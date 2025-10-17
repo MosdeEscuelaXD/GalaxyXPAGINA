@@ -1,26 +1,27 @@
 /* ======================================================
-   🌌 GALAXY X 2.0 — ESTILOS PRINCIPALES
-   by Gabriel & ChatGPT
+   🌌 GALAXY X 3.1 — ESTILOS MEJORADOS
+   Discord-style vertical sidebar + IA canal propio
 ====================================================== */
 
 /* ===== Reset y base ===== */
 * {
     box-sizing: border-box;
     scroll-behavior: smooth;
+    font-family: 'Poppins', sans-serif;
 }
 
 body {
     margin: 0;
-    font-family: 'Poppins', sans-serif;
     color: #fff;
-    background: radial-gradient(circle at center, #1b0033, #000010 80%);
+    background: radial-gradient(circle at center, #1b0033, #000010 85%);
     overflow-x: hidden;
     user-select: none;
+    display: flex;
 }
 
-/* ===== Scroll personalizado ===== */
+/* ===== Scroll moderno ===== */
 ::-webkit-scrollbar {
-    width: 8px;
+    width: 10px;
 }
 ::-webkit-scrollbar-thumb {
     background: linear-gradient(180deg, #ff69b4, #8a2be2);
@@ -30,57 +31,78 @@ body {
     background: rgba(255,255,255,0.05);
 }
 
-/* ===== Header y navegación ===== */
-header {
-    text-align: center;
-    padding: 20px;
-    background: rgba(0,0,0,0.4);
-    backdrop-filter: blur(6px);
-    border-bottom: 2px solid #ff69b4;
-    box-shadow: 0 0 30px rgba(255, 105, 180, 0.6);
-    animation: headerGlow 5s ease-in-out infinite alternate;
-}
-
-@keyframes headerGlow {
-    0% { box-shadow: 0 0 20px #8a2be2; }
-    100% { box-shadow: 0 0 40px #ff69b4; }
-}
-
-nav {
+/* ===== Barra lateral vertical estilo Discord ===== */
+#sidebar {
+    width: 200px;
+    min-width: 200px;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(10px);
+    border-right: 2px solid #ff69b4;
+    box-shadow: 0 0 20px rgba(255,105,180,0.5);
     display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 10px;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 100;
 }
 
-nav button {
-    padding: 12px 28px;
-    border: none;
-    border-radius: 25px;
-    background: linear-gradient(45deg, #8a2be2, #ff69b4);
-    color: white;
-    font-weight: bold;
-    letter-spacing: 0.5px;
+#sidebar h1 {
+    margin: 0 0 20px 0;
+    text-align: center;
+    text-shadow: 0 0 8px #ff69b4;
+}
+
+#sidebar nav {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    align-items: center;
+}
+
+#sidebar nav button {
+    width: 80%;
+    padding: 10px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.05);
+    color: #fff;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    text-shadow: 0 0 5px rgba(255,255,255,0.6);
-    box-shadow: 0 0 15px rgba(255,105,180,0.4);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 0 10px rgba(255,105,180,0.3);
+    text-align: left;
 }
-nav button:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 25px rgba(255,105,180,0.8);
-    filter: brightness(1.3);
+#sidebar nav button:hover {
+    background: linear-gradient(45deg, #8a2be2, #ff69b4);
+    transform: scale(1.05);
+    box-shadow: 0 0 25px rgba(255,105,180,0.7);
+}
+
+#accountStatusSidebar {
+    margin-top: auto;
+    text-align: center;
+    width: 100%;
+}
+
+/* ===== Contenido principal ajustado al sidebar ===== */
+#mainContent {
+    margin-left: 200px;
+    padding: 25px;
+    flex: 1;
 }
 
 /* ===== Secciones ===== */
 .section {
     display: none;
-    padding: 25px;
-    text-align: center;
+    padding: 15px;
     min-height: 70vh;
     animation: fadeIn 0.6s ease;
 }
-
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(25px); }
     to { opacity: 1; transform: translateY(0); }
@@ -92,77 +114,59 @@ nav button:hover {
     margin: 20px auto;
     padding: 15px;
     border-radius: 15px;
-    border: 1.5px solid rgba(255,255,255,0.3);
-    background: rgba(0,0,0,0.5);
-    backdrop-filter: blur(10px);
+    background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(12px);
     overflow-y: auto;
     min-height: 230px;
-    box-shadow: 0 0 20px rgba(255,105,180,0.4);
-    transition: 0.3s ease;
+    box-shadow: 0 0 25px rgba(255,105,180,0.5);
+    transition: all 0.3s ease;
 }
 #chatBox:hover, #assistantChat:hover, #foroBox:hover {
-    box-shadow: 0 0 25px rgba(255,105,180,0.7);
+    box-shadow: 0 0 35px rgba(255,105,180,0.8);
 }
 
-/* Mensajes */
-.chatMessage, .foroPost p {
-    text-align: left;
-    margin: 8px 0;
+/* ===== Mensajes tipo Discord ===== */
+.user-message, .ai-message {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.user-message p, .ai-message p {
+    margin: 0;
+    padding: 10px 15px;
+    border-radius: 12px;
+    max-width: 70%;
     line-height: 1.4;
+    font-size: 14px;
 }
 
-.chatAvatar {
+.user-message p {
+    background: rgba(255,105,180,0.3);
+    color: #fff;
+    border-left: 4px solid #ff69b4;
+}
+
+.ai-message p {
+    background: rgba(138,43,226,0.3);
+    color: #fff;
+    border-left: 4px solid #8a2be2;
+}
+
+/* ===== Avatares ===== */
+.chatAvatar, #assistantAvatar, .profileAvatar {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    margin-right: 10px;
     border: 2px solid #ff69b4;
-    box-shadow: 0 0 10px #ff69b4;
-    vertical-align: middle;
+    box-shadow: 0 0 12px #ff69b4;
 }
-
-/* ===== Inputs generales ===== */
-input, textarea {
-    border: none;
-    border-radius: 10px;
-    padding: 8px 12px;
-    outline: none;
-    width: 60%;
-    background: rgba(255,255,255,0.1);
-    color: white;
-    font-size: 14px;
-    transition: all 0.3s ease;
-}
-input:focus, textarea:focus {
-    background: rgba(255,255,255,0.2);
-    box-shadow: 0 0 10px rgba(255,105,180,0.6);
-}
-
-/* ===== Botones ===== */
-button {
-    background: linear-gradient(45deg, #ff69b4, #8a2be2);
-    color: white;
-    border: none;
-    border-radius: 25px;
-    padding: 10px 20px;
-    margin: 5px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.3s;
-    box-shadow: 0 0 15px rgba(255,105,180,0.4);
-}
-button:hover {
-    transform: scale(1.07);
-    box-shadow: 0 0 25px rgba(255,105,180,0.7);
-}
-
-/* ===== IA Avatar flotante ===== */
 #assistantAvatar {
     width: 100px;
     height: 100px;
-    border-radius: 50%;
-    border: 3px solid #ff69b4;
-    box-shadow: 0 0 25px #ff69b4;
+    border: 3px solid #8a2be2;
+    box-shadow: 0 0 25px #8a2be2;
     animation: floatAvatar 4s ease-in-out infinite;
 }
 @keyframes floatAvatar {
@@ -171,32 +175,68 @@ button:hover {
     100% { transform: translateY(0); }
 }
 
+/* ===== Inputs y Textareas ===== */
+input, textarea {
+    border: none;
+    border-radius: 12px;
+    padding: 10px 14px;
+    outline: none;
+    width: 60%;
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+input:focus, textarea:focus {
+    background: rgba(255,255,255,0.2);
+    box-shadow: 0 0 15px rgba(255,105,180,0.6);
+}
+
+/* ===== Botones estilo Discord moderno ===== */
+button {
+    background: rgba(255,255,255,0.1);
+    border-radius: 25px;
+    padding: 10px 22px;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 0 10px rgba(255,105,180,0.4);
+}
+button:hover {
+    background: linear-gradient(45deg, #ff69b4, #8a2be2);
+    transform: scale(1.07);
+    box-shadow: 0 0 25px rgba(255,105,180,0.7);
+}
+
 /* ===== Videos ===== */
 .videoItem {
     margin: 15px auto;
     padding: 15px;
     width: 80%;
     border-radius: 15px;
-    background: rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(6px);
     box-shadow: 0 0 20px rgba(255,105,180,0.4);
     transition: all 0.3s;
 }
 .videoItem:hover {
     transform: scale(1.05);
-    box-shadow: 0 0 25px rgba(255,105,180,0.7);
+    box-shadow: 0 0 30px rgba(255,105,180,0.7);
 }
 #videoPlayer iframe {
     border-radius: 15px;
-    box-shadow: 0 0 20px rgba(255,105,180,0.6);
+    box-shadow: 0 0 25px rgba(255,105,180,0.6);
 }
 
 /* ===== Foro ===== */
 .foroPost {
-    background: rgba(255,255,255,0.08);
-    padding: 10px;
+    background: rgba(255,255,255,0.05);
+    padding: 12px;
     border-radius: 12px;
     margin-bottom: 10px;
-    box-shadow: 0 0 10px rgba(255,105,180,0.3);
+    box-shadow: 0 0 15px rgba(255,105,180,0.3);
     text-align: left;
 }
 
@@ -212,22 +252,20 @@ button:hover {
     height: 90px;
     border-radius: 50%;
     border: 3px solid #ff69b4;
-    box-shadow: 0 0 20px #ff69b4;
+    box-shadow: 0 0 25px #ff69b4;
     animation: floatAvatar 4s ease-in-out infinite;
 }
 #profilePreview h3 {
-    margin-top: 8px;
-    text-shadow: 0 0 8px #ff69b4;
+    margin-top: 10px;
+    text-shadow: 0 0 10px #ff69b4;
 }
 
-/* Mini avatar en header */
+/* Mini avatar header */
 .miniAvatar {
     width: 32px;
     height: 32px;
     border-radius: 50%;
     border: 2px solid #ff69b4;
-    margin-right: 5px;
-    vertical-align: middle;
 }
 
 /* ===== Música ===== */
@@ -242,19 +280,17 @@ button:hover {
     background: rgba(0,0,0,0.7);
     border: 2px solid #ff69b4;
     border-radius: 30px;
-    padding: 10px 25px;
-    color: white;
+    padding: 12px 25px;
+    color: #fff;
     box-shadow: 0 0 25px rgba(255,105,180,0.5);
     backdrop-filter: blur(6px);
-    z-index: 1000;
     animation: playerGlow 4s ease-in-out infinite alternate;
+    z-index: 1000;
 }
-
 @keyframes playerGlow {
     0% { box-shadow: 0 0 15px #ff69b4; }
     100% { box-shadow: 0 0 35px #8a2be2; }
 }
-
 #musicPlayer button {
     width: 36px;
     height: 36px;
@@ -270,20 +306,9 @@ button:hover {
     background: linear-gradient(45deg, #ff69b4, #8a2be2);
     transform: scale(1.2);
 }
-#progressBar {
+#progressBar, #volumeControl {
     accent-color: #ff69b4;
-    width: 120px;
     cursor: pointer;
-}
-#volumeControl {
-    accent-color: #ff69b4;
-    width: 70px;
-    cursor: pointer;
-}
-#songTitle {
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
 }
 
 /* ===== Canvas fondo ===== */
@@ -294,21 +319,15 @@ button:hover {
     width: 100%;
     height: 100%;
     z-index: -1;
-    background: transparent;
 }
 
-/* ===== Efecto de brillo orbital ===== */
-.glow {
-    text-shadow: 0 0 10px #ff69b4, 0 0 20px #8a2be2;
+/* ===== Texto neón animado ===== */
+.glow, h2, h3 {
+    text-shadow: 0 0 8px #ff69b4, 0 0 20px #8a2be2;
+    animation: neonPulse 3s infinite ease-in-out;
 }
-
-/* ===== Animación de texto flotante ===== */
 @keyframes neonPulse {
     0% { filter: drop-shadow(0 0 5px #ff69b4); }
     50% { filter: drop-shadow(0 0 15px #8a2be2); }
     100% { filter: drop-shadow(0 0 5px #ff69b4); }
-}
-
-h2, h3 {
-    animation: neonPulse 3s infinite ease-in-out;
 }
