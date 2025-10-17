@@ -1,50 +1,96 @@
 /* ==========================
-   🌌 SISTEMA DE SECCIONES
+   🌌 GALAXY X — script.js
+   Versión: integración música de fondo + buscador YouTube + mejoras
+========================== */
+
+/* ==========================
+   🌐 Sistema de secciones
 ========================== */
 function showSection(sectionId) {
     document.querySelectorAll('.section').forEach(sec => sec.style.display = 'none');
-    document.getElementById(sectionId).style.display = 'block';
+    const el = document.getElementById(sectionId);
+    if (el) el.style.display = 'block';
 }
 showSection('chat');
 
 /* ==========================
-   ✨ FONDO GALÁCTICO
+   ✨ Fondo galáctico + visualizador
 ========================== */
 const canvas = document.getElementById('galaxyCanvas');
-const ctx = canvas.getContext('2d');
-canvas.width = innerWidth;
-canvas.height = innerHeight;
-window.addEventListener('resize', () => {
+const ctx = canvas ? canvas.getContext('2d') : null;
+if (canvas && ctx) {
     canvas.width = innerWidth;
     canvas.height = innerHeight;
-});
+    window.addEventListener('resize', () => {
+        canvas.width = innerWidth;
+        canvas.height = innerHeight;
+    });
+}
 
 const stars = Array.from({ length: 250 }, () => ({
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height,
+    x: (canvas ? Math.random() * canvas.width : 0),
+    y: (canvas ? Math.random() * canvas.height : 0),
     r: Math.random() * 2 + 1,
     alpha: Math.random()
 }));
 
+let audioCtx, analyser, dataArray, bufferLength;
+
 function drawGalaxy() {
+    if (!ctx) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // estrellas
     for (const s of stars) {
         ctx.beginPath();
-        ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(255,255,255,${s.alpha})`;
         ctx.fill();
-        s.alpha += (Math.random()-0.5)*0.02;
-        if(s.alpha < 0.3) s.alpha = 0.8;
+        s.alpha += (Math.random() - 0.5) * 0.02;
+        if (s.alpha < 0.25) s.alpha = Math.random() * 0.6 + 0.4;
     }
+
+    // visualizador circular (si existe analyzer)
+    if (analyser && dataArray) {
+        analyser.getByteFrequencyData(dataArray);
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2;
+        const radius = Math.min(canvas.width, canvas.height) * 0.12;
+        const bars = Math.min(dataArray.length, 120);
+
+        ctx.save();
+        ctx.translate(cx, cy);
+        for (let i = 0; i < bars; i++) {
+            const angle = (i / bars) * Math.PI * 2;
+            const v = dataArray[i] / 255;
+            const barH = v * 120;
+            const x = Math.cos(angle) * radius;
+            const y = Math.sin(angle) * radius;
+
+            const grad = ctx.createLinearGradient(0, 0, x, y);
+            grad.addColorStop(0, '#ff69b4');
+            grad.addColorStop(1, '#8a2be2');
+
+            ctx.strokeStyle = grad;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x * (1.2 + v * 0.8), y * (1.2 + v * 0.8));
+            ctx.stroke();
+        }
+        ctx.restore();
+    }
+
     requestAnimationFrame(drawGalaxy);
 }
 drawGalaxy();
 
 /* ==========================
-   💬 CHAT TIPO DISCORD
+   💬 Chat (canal general)
 ========================== */
 function appendChatMsg(text) {
     const chat = document.getElementById('chatBox');
+    if (!chat) return;
     const msgDiv = document.createElement('div');
     msgDiv.className = 'user-message';
     const avatar = localStorage.getItem('avatar') || '';
@@ -58,38 +104,70 @@ function appendChatMsg(text) {
 
 function sendChat() {
     const input = document.getElementById('chatInput');
+    if (!input) return;
     const msg = input.value.trim();
-    if(!msg) return;
-
+    if (!msg) return;
     const user = localStorage.getItem('username') || 'Usuario';
     appendChatMsg(`<b>${user}:</b> ${msg}`);
     input.value = '';
     saveChatHistory();
 }
 
-document.getElementById('clearChatBtn').onclick = () => {
-    document.getElementById('chatBox').innerHTML = '';
+/* botones chat */
+const clearChatBtn = document.getElementById('clearChatBtn');
+if (clearChatBtn) clearChatBtn.onclick = () => {
+    const chat = document.getElementById('chatBox');
+    if (chat) chat.innerHTML = '';
     localStorage.removeItem('chatHistory');
 };
-document.getElementById('saveChatBtn').onclick = saveChatHistory;
-document.getElementById('loadChatBtn').onclick = loadChatHistory;
-loadChatHistory();
+const saveChatBtn = document.getElementById('saveChatBtn');
+if (saveChatBtn) saveChatBtn.onclick = saveChatHistory;
+const loadChatBtn = document.getElementById('loadChatBtn');
+if (loadChatBtn) loadChatBtn.onclick = loadChatHistory;
 
 function saveChatHistory() {
-    localStorage.setItem('chatHistory', document.getElementById('chatBox').innerHTML);
+    const chat = document.getElementById('chatBox');
+    if (!chat) return;
+    localStorage.setItem('chatHistory', chat.innerHTML);
 }
 function loadChatHistory() {
+    const chat = document.getElementById('chatBox');
+    if (!chat) return;
     const saved = localStorage.getItem('chatHistory');
-    if(saved) document.getElementById('chatBox').innerHTML = saved;
+    if (saved) chat.innerHTML = saved;
 }
+loadChatHistory();
 
 /* ==========================
-   🎥 VIDEOS
+   🎥 Videos: reproducir por enlace + agregar demo
 ========================== */
-function playVideo(name) {
+function getYouTubeID(url) {
+    try {
+        const u = new URL(url);
+        if (u.hostname.includes('youtu.be')) return u.pathname.slice(1);
+        if (u.searchParams.get('v')) return u.searchParams.get('v');
+        // soporta /embed/ y /v/
+        const parts = u.pathname.split('/');
+        return parts.pop();
+    } catch (e) {
+        return null;
+    }
+}
+
+function playYoutubeLink() {
+    const input = document.getElementById('youtubeLink');
+    if (!input) return alert('Campo no encontrado.');
+    const url = input.value.trim();
+    if (!url) return alert('Pega un enlace de YouTube.');
+    const id = getYouTubeID(url);
+    if (!id) return alert('No pude obtener el ID del enlace. Asegúrate de pegar un enlace de YouTube válido.');
+    playYoutubeById(id);
+}
+
+function playYoutubeById(id) {
     const player = document.getElementById('videoPlayer');
+    if (!player) return;
     player.innerHTML = '';
-    const id = name==='video1'?'dQw4w9WgXcQ':'3JZ_D3ELwOQ';
     const iframe = document.createElement('iframe');
     iframe.src = `https://www.youtube.com/embed/${id}`;
     iframe.width = 560;
@@ -98,132 +176,178 @@ function playVideo(name) {
     player.appendChild(iframe);
 }
 
+// boton agregar demo
+const addVideoBtn = document.getElementById('addVideoBtn');
+if (addVideoBtn) {
+    addVideoBtn.onclick = () => {
+        const list = document.getElementById('videoList');
+        if (!list) return;
+        const id = prompt('Pega el ID de YouTube o enlace (demo):', 'dQw4w9WgXcQ') || 'dQw4w9WgXcQ';
+        const vid = getYouTubeID(id) || id;
+        const card = document.createElement('div');
+        card.className = 'videoItem';
+        card.innerHTML = `<p><strong>Demo — Nuevo video</strong></p>
+            <button onclick="playYoutubeById('${vid}')">Reproducir</button>
+            <button onclick="this.parentElement.remove()">✖ Eliminar</button>`;
+        list.prepend(card);
+    };
+}
+
 /* ==========================
-   🧵 FORO
+   🧵 Foro
 ========================== */
 function postForo() {
-    const titulo = document.getElementById('foroTitulo').value.trim();
-    const comentario = document.getElementById('foroComentario').value.trim();
-    if(!titulo||!comentario) return alert('Completa todos los campos.');
-    
+    const tituloEl = document.getElementById('foroTitulo');
+    const comentarioEl = document.getElementById('foroComentario');
+    if (!tituloEl || !comentarioEl) return;
+    const titulo = tituloEl.value.trim();
+    const comentario = comentarioEl.value.trim();
+    if (!titulo || !comentario) return alert('Completa todos los campos.');
+
     const foroBox = document.getElementById('foroBox');
+    if (!foroBox) return;
     const user = localStorage.getItem('username') || 'Usuario';
     const avatar = localStorage.getItem('avatar') || '';
 
     const post = document.createElement('div');
     post.className = 'foroPost';
     post.innerHTML = `
-        ${avatar?`<img src="${avatar}" class="chatAvatar">`:''}
+        ${avatar ? `<img src="${avatar}" class="chatAvatar">` : ''}
         <strong>${user}</strong>
         <h4>${titulo}</h4>
         <p>${comentario}</p>
     `;
-    foroBox.appendChild(post);
-
-    document.getElementById('foroTitulo').value = '';
-    document.getElementById('foroComentario').value = '';
+    foroBox.prepend(post);
+    tituloEl.value = '';
+    comentarioEl.value = '';
 }
 
 /* ==========================
-   👤 PERFIL
+   👤 Perfil
 ========================== */
 function saveProfile() {
-    const username = document.getElementById('username').value.trim();
-    const email = document.getElementById('userEmail').value.trim();
-    const file = document.getElementById('userAvatarInput').files[0];
+    const usernameEl = document.getElementById('username');
+    const emailEl = document.getElementById('userEmail');
+    const fileEl = document.getElementById('userAvatarInput');
+    if (!usernameEl || !emailEl || !fileEl) return alert('Campos de perfil no encontrados.');
 
-    if(!username) return alert('Ingresa tu nombre.');
+    const username = usernameEl.value.trim();
+    const email = emailEl.value.trim();
+    const file = fileEl.files[0];
+
+    if (!username) return alert('Ingresa tu nombre.');
     localStorage.setItem('username', username);
-    localStorage.setItem('userEmail', email);
+    localStorage.setItem('userEmail', email || '');
 
-    if(file){
+    if (file) {
         const reader = new FileReader();
         reader.onload = e => {
             localStorage.setItem('avatar', e.target.result);
             showProfilePreview();
         };
         reader.readAsDataURL(file);
-    } else showProfilePreview();
+    } else {
+        showProfilePreview();
+    }
 }
 function showProfilePreview() {
-    const name = localStorage.getItem('username');
-    const avatar = localStorage.getItem('avatar');
+    const name = localStorage.getItem('username') || '';
+    const avatar = localStorage.getItem('avatar') || '';
     const preview = document.getElementById('profilePreview');
+    if (!preview) return;
     preview.innerHTML = avatar
         ? `<img src="${avatar}" class="profileAvatar"><h3>${name}</h3>`
         : `<h3>${name}</h3>`;
     updateHeaderProfile();
 }
 function updateHeaderProfile() {
-    const area = document.getElementById('accountStatus');
+    const area = document.getElementById('accountStatusSidebar') || document.getElementById('accountStatus');
+    if (!area) return;
     const name = localStorage.getItem('username');
     const avatar = localStorage.getItem('avatar');
-    if(name) area.innerHTML = avatar
-        ? `<img src="${avatar}" class="miniAvatar"><span>${name}</span>`
-        : `<span>${name}</span>`;
+    if (name) {
+        area.innerHTML = avatar
+            ? `<img src="${avatar}" class="miniAvatar"><span>${name}</span>`
+            : `<span>${name}</span>`;
+    } else area.innerHTML = '';
 }
 function clearProfile() {
-    if(confirm('¿Borrar tu perfil local?')){
-        localStorage.removeItem('username');
-        localStorage.removeItem('avatar');
-        localStorage.removeItem('userEmail');
-        document.getElementById('profilePreview').innerHTML = '';
-        updateHeaderProfile();
-    }
+    if (!confirm('¿Borrar tu perfil local?')) return;
+    localStorage.removeItem('username');
+    localStorage.removeItem('avatar');
+    localStorage.removeItem('userEmail');
+    const preview = document.getElementById('profilePreview');
+    if (preview) preview.innerHTML = '';
+    updateHeaderProfile();
 }
-document.getElementById('saveProfileBtn').onclick = saveProfile;
-document.getElementById('clearProfileBtn').onclick = clearProfile;
+const saveProfileBtn = document.getElementById('saveProfileBtn');
+if (saveProfileBtn) saveProfileBtn.onclick = saveProfile;
+const clearProfileBtn = document.getElementById('clearProfileBtn');
+if (clearProfileBtn) clearProfileBtn.onclick = clearProfile;
 showProfilePreview();
 
 /* ==========================
-   🤖 ASISTENTE IA (SOLO EN SU CANAL)
+   🤖 ASISTENTE IA (solo en su canal)
 ========================== */
-let aiMemory = JSON.parse(localStorage.getItem('aiMemory')||'[]');
+let aiMemory = JSON.parse(localStorage.getItem('aiMemory') || '[]');
 
 function talkToAssistant() {
     const input = document.getElementById('assistantInput');
+    if (!input) return;
     const msg = input.value.trim();
-    if(!msg) return;
-
+    if (!msg) return;
     const chat = document.getElementById('assistantChat');
-    appendAIMsg(chat, 'user', msg);
+    if (!chat) return;
 
+    appendAIMsg(chat, 'user', msg);
     const reply = aiThink(msg);
     appendAIMsg(chat, 'ai', reply);
 
-    aiMemory.push({q: msg, a: reply});
+    aiMemory.push({ q: msg, a: reply, t: Date.now() });
     localStorage.setItem('aiMemory', JSON.stringify(aiMemory));
     input.value = '';
     chat.scrollTop = chat.scrollHeight;
 }
 
-function appendAIMsg(chat, who, text){
+function appendAIMsg(chat, who, text) {
     const div = document.createElement('div');
-    div.className = who==='ai' ? 'ai-message' : 'user-message';
-    const avatar = who==='ai'
-        ? 'https://i.pinimg.com/1200x/7e/56/05/7e5605d304c272bd1c52fd26517f0803.jpg'
+    div.className = who === 'ai' ? 'ai-message' : 'user-message';
+    const avatar = who === 'ai'
+        ? (document.getElementById('assistantAvatar') ? document.getElementById('assistantAvatar').src : '')
         : localStorage.getItem('avatar') || '';
     div.innerHTML = `${avatar ? `<img src="${avatar}" class="chatAvatar">` : ''}<p>${text}</p>`;
     chat.appendChild(div);
 }
 
-function aiThink(msg){
+function aiThink(msg) {
     const m = msg.toLowerCase();
     const user = localStorage.getItem('username') || 'amigo';
-    if(m.includes('hola')) return `¡Hola ${user}! 🌠`;
-    if(m.includes('quién eres')) return 'Soy Galaxy IA, tu asistente cósmico 🚀';
-    if(m.includes('nombre')) return `Tu nombre registrado es ${user}.`;
-    if(m.includes('video')) return 'Vamos a la sección de Videos 🎥';
-    if(m.includes('foro')) return 'Explora el Foro 📜';
-    if(m.includes('gracias')) return '¡De nada! 💫';
-    if(m.includes('adiós')) return 'Hasta pronto 👋';
-    if(m.includes('ir a')){
-        if(m.includes('chat')) showSection('chat');
-        if(m.includes('videos')) showSection('videos');
-        if(m.includes('foro')) showSection('foro');
-        if(m.includes('perfil')) showSection('perfil');
-        return 'Te llevé a la sección que pediste 😉';
+
+    // comandos directos
+    if (m.includes('hola')) return `¡Hola ${user}! 🌠 ¿En qué puedo ayudarte hoy?`;
+    if (m.includes('quién eres') || m.includes('quien eres')) return 'Soy Galaxy IA, tu asistente cósmico 🚀. Puedo recordar temas, abrir secciones y ayudarte a encontrar videos.';
+    if (m.includes('nombre')) return `Tu nombre registrado es ${user}.`;
+    if (m.includes('video')) { showSection('videos'); return 'Te llevé a Videos. Pega un enlace o busca uno.'; }
+    if (m.includes('foro')) { showSection('foro'); return 'Abriendo Foro...'; }
+    if (m.includes('gracias')) return '¡De nada! Siempre a tu servicio ✨';
+    if (m.includes('adiós') || m.includes('chao')) return 'Hasta pronto 👋';
+
+    // "ir a" comandos
+    if (m.includes('ir a')) {
+        if (m.includes('chat')) { showSection('chat'); return 'Llevándote al Chat.'; }
+        if (m.includes('videos')) { showSection('videos'); return 'Llevándote a Videos.'; }
+        if (m.includes('foro')) { showSection('foro'); return 'Llevándote al Foro.'; }
+        if (m.includes('perfil')) { showSection('perfil'); return 'Llevándote a Perfil.'; }
     }
+
+    // recordar/guardar (simple)
+    if (m.startsWith('recuérdame') || m.startsWith('recordar')) {
+        aiMemory.push({ q: msg, a: 'Recordatorio guardado', t: Date.now() });
+        localStorage.setItem('aiMemory', JSON.stringify(aiMemory));
+        return 'He guardado ese recordatorio en mi memoria local.';
+    }
+
+    // respuestas variadas y no repetitivas
     const replies = [
         'Interesante... cuéntame más.',
         'Hmm... eso me hace pensar 🤔',
@@ -232,72 +356,147 @@ function aiThink(msg){
         'Buena idea, ¿quieres que lo recuerde?',
         'Anotado en mi memoria cósmica ✨'
     ];
-    return replies[Math.floor(Math.random()*replies.length)];
+    // intento de evitar repetición consultando memoria
+    const lastSimilar = aiMemory.slice().reverse().find(r => r.q && r.q.toLowerCase().includes(msg.toLowerCase().split(' ')[0]));
+    if (lastSimilar) return `Ya hablamos antes de algo parecido: "${lastSimilar.q}". ¿Quieres continuar?`;
+    return replies[Math.floor(Math.random() * replies.length)];
 }
 
-document.getElementById('clearAIBtn').onclick = () => {
-    if(confirm('¿Borrar memoria de la IA?')){
-        aiMemory=[];
-        localStorage.removeItem('aiMemory');
-        document.getElementById('assistantChat').innerHTML='';
-    }
+const clearAIBtn = document.getElementById('clearAIBtn');
+if (clearAIBtn) clearAIBtn.onclick = () => {
+    if (!confirm('¿Borrar memoria de la IA?')) return;
+    aiMemory = [];
+    localStorage.removeItem('aiMemory');
+    const chat = document.getElementById('assistantChat');
+    if (chat) chat.innerHTML = '';
 };
 
 /* ==========================
-   🎵 MÚSICA
+   🎵 Música de fondo (integrada + visualizador)
 ========================== */
-const songs = [{title:'Canción 1',src:'audio/cancion1.mp3'},{title:'Canción 2',src:'audio/cancion2.mp3'}];
+const songs = [
+    { title: 'Canción 1', src: 'audio/cancion1.mp3' },
+    { title: 'Canción 2', src: 'audio/cancion2.mp3' }
+];
+
 let current = 0;
 const audio = new Audio(songs[current].src);
+audio.crossOrigin = "anonymous"; // para audioCtx
+let isPlaying = false;
+
 const playPause = document.getElementById('playPause');
 const nextSong = document.getElementById('nextSong');
 const prevSong = document.getElementById('prevSong');
 const volumeControl = document.getElementById('volumeControl');
-const title = document.getElementById('songTitle');
+const titleEl = document.getElementById('songTitle');
 
 const progressBar = document.createElement('input');
-progressBar.type='range'; progressBar.min=0; progressBar.max=100; progressBar.value=0;
-document.getElementById('musicPlayer').appendChild(progressBar);
-const timeDisplay=document.createElement('span'); timeDisplay.style.marginLeft='10px';
-document.getElementById('musicPlayer').appendChild(timeDisplay);
+progressBar.type = 'range';
+progressBar.min = 0;
+progressBar.max = 100;
+progressBar.value = 0;
+progressBar.id = 'progressBar';
+const musicPlayer = document.getElementById('musicPlayer');
+if (musicPlayer) musicPlayer.appendChild(progressBar);
 
-let isPlaying=false;
-function setupVisualizer(){
-    if(!audioCtx){
-        audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-        const src=audioCtx.createMediaElementSource(audio);
+const timeDisplay = document.createElement('span');
+timeDisplay.style.marginLeft = '10px';
+if (musicPlayer) musicPlayer.appendChild(timeDisplay);
+
+function setupVisualizer() {
+    if (!audioCtx && audio) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const src = audioCtx.createMediaElementSource(audio);
         analyser = audioCtx.createAnalyser();
         analyser.fftSize = 256;
-        bufferLength=analyser.frequencyBinCount;
-        dataArray=new Uint8Array(bufferLength);
+        bufferLength = analyser.frequencyBinCount;
+        dataArray = new Uint8Array(bufferLength);
         src.connect(analyser);
         analyser.connect(audioCtx.destination);
     }
 }
-function playPauseMusic(){
+
+function playPauseMusic() {
     setupVisualizer();
-    if(!isPlaying){audio.play(); playPause.textContent='⏸️'; isPlaying=true;}
-    else{audio.pause(); playPause.textContent='▶️'; isPlaying=false;}
+    if (!isPlaying) {
+        audio.play().catch(()=>{ /* autoplay puede bloquearse; el usuario debe interactuar */ });
+        playPause && (playPause.textContent = '⏸️');
+        isPlaying = true;
+    } else {
+        audio.pause();
+        playPause && (playPause.textContent = '▶️');
+        isPlaying = false;
+    }
 }
-function changeSong(i){
-    current=(i+songs.length)%songs.length;
-    audio.src=songs[current].src;
-    title.textContent=`Reproduciendo: ${songs[current].title}`;
-    audio.play(); playPause.textContent='⏸️'; isPlaying=true;
+function changeSong(i) {
+    current = (i + songs.length) % songs.length;
+    audio.src = songs[current].src;
+    titleEl && (titleEl.textContent = `Reproduciendo: ${songs[current].title}`);
+    audio.play().catch(()=>{});
+    playPause && (playPause.textContent = '⏸️');
+    isPlaying = true;
 }
-playPause.onclick=playPauseMusic;
-nextSong.onclick=()=>changeSong(current+1);
-prevSong.onclick=()=>changeSong(current-1);
-volumeControl.oninput=()=>audio.volume=volumeControl.value;
-audio.addEventListener('timeupdate',()=>{
-    if(audio.duration){
-        const p=(audio.currentTime/audio.duration)*100;
-        progressBar.value=p;
-        timeDisplay.textContent=`${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
+
+if (playPause) playPause.onclick = playPauseMusic;
+if (nextSong) nextSong.onclick = () => changeSong(current + 1);
+if (prevSong) prevSong.onclick = () => changeSong(current - 1);
+if (volumeControl) volumeControl.oninput = () => (audio.volume = volumeControl.value);
+
+audio.addEventListener('timeupdate', () => {
+    if (audio.duration) {
+        const p = (audio.currentTime / audio.duration) * 100;
+        progressBar.value = p;
+        timeDisplay.textContent = `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
     }
 });
-progressBar.addEventListener('input',()=>{audio.currentTime=(progressBar.value/100)*audio.duration;});
-function formatTime(sec){const m=Math.floor(sec/60);const s=Math.floor(sec%60).toString().padStart(2,'0'); return `${m}:${s}`;}
-title.textContent=`Reproduciendo: ${songs[current].title}`;
+progressBar.addEventListener('input', () => {
+    if (!audio.duration) return;
+    audio.currentTime = (progressBar.value / 100) * audio.duration;
+});
 
-console.log('✅ Galaxy X actualizado — Chat normal + IA canal propio + Perfil + Música listo');
+function formatTime(sec) {
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+}
+titleEl && (titleEl.textContent = `Reproduciendo: ${songs[current].title}`);
+
+/* ==========================
+   🎵 Botón lateral: activar/pausar música de fondo
+========================== */
+function toggleBackgroundMusic() {
+    // si no hay elemento de música, simplemente alterna play/pause
+    playPauseMusic();
+}
+
+/* ==========================
+   🔄 Integración visualizador con drawGalaxy
+   (actualiza analyzer cada frame si existe)
+========================== */
+(function visualizerLoop() {
+    // si hay analyzer y canvas, se alimenta drawGalaxy (ya usa analyzer)
+    if (!analyser && audio && (audioCtx === undefined || audioCtx === null)) {
+        // no hacer nada, setupVisualizer se llama cuando usuario interactúe
+    }
+    requestAnimationFrame(visualizerLoop);
+})();
+
+/* ==========================
+   🧾 Inicializaciones finales
+========================== */
+// Asegurar que elementos opcionales no rompan
+document.addEventListener('DOMContentLoaded', () => {
+    // show profile if stored
+    showProfilePreview();
+    // If a saved chat exists load it
+    loadChatHistory();
+    // Set initial volume
+    try { audio.volume = (volumeControl ? volumeControl.value : 0.5); } catch (e) {}
+    // Attach youtube play from input if exists
+    const ytInput = document.getElementById('youtubeLink');
+    if (ytInput) ytInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') playYoutubeLink();
+    });
+});
+
+console.log('✅ Galaxy X — script.js cargado y listo (música, videos, chat, IA).');

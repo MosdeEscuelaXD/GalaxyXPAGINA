@@ -20,6 +20,7 @@
             <button onclick="showSection('ai')">🤖 IA</button>
             <button onclick="showSection('info')">ℹ️ Info</button>
             <button onclick="showSection('perfil')">👤 Perfil</button>
+            <button onclick="toggleBackgroundMusic()">🎵 Música Galaxy X</button>
         </nav>
         <div id="accountStatusSidebar"></div>
     </aside>
@@ -61,9 +62,13 @@
         <section id="videos" class="section">
             <h2>Videos & Streams</h2>
             <p>Explora streams en vivo, videos recomendados y favoritos.</p>
+            <div class="video-search card">
+                <input type="text" id="youtubeLink" placeholder="Pega el enlace de YouTube aquí">
+                <button onclick="playYoutubeLink()">Reproducir</button>
+            </div>
             <div id="videoList" class="card"></div>
             <div id="videoPlayer" class="card small" style="margin-top:15px;"></div>
-            <button id="addVideoBtn" style="margin-top:10px;">Agregar video (demo)</button>
+            <button id="addVideoBtn" style="margin-top:10px;">Agregar video demo</button>
         </section>
 
         <!-- Foro -->
@@ -105,17 +110,33 @@
             <h2>Información</h2>
             <div class="card">
                 <h3>¿Qué es Galaxy X?</h3>
-                <p>Galaxy X es una plataforma experimental para chats, foros, videos y un asistente IA avanzado con memoria y acciones.</p>
+                <p>Galaxy X es una plataforma de entretenimiento y productividad digital con enfoque en chat, foros, videos y un asistente IA avanzado con memoria activa y acciones inteligentes.</p>
+                
                 <h3>Funciones principales</h3>
                 <ul>
-                    <li>Chats con avatar y nombre.</li>
-                    <li>Foros y publicaciones con estilo moderno.</li>
-                    <li>Videos y streams con reproductor embebido y favoritos.</li>
-                    <li>Asistente IA con memoria, comandos y recordatorios.</li>
-                    <li>Perfil y cuenta con registro de correo y persistencia en localStorage.</li>
+                    <li>Canales de chat con avatar y nombre de usuario.</li>
+                    <li>Foros con publicación moderna y moderación básica.</li>
+                    <li>Videos y streams con reproductor embebido y soporte para enlaces externos.</li>
+                    <li>Asistente IA con memoria, recordatorios y comandos de navegación.</li>
+                    <li>Perfil de usuario con foto, correo y configuración persistente.</li>
+                    <li>Música de fondo reproducible mientras navegas por la plataforma.</li>
                 </ul>
-                <h3>Privacidad</h3>
-                <p class="muted">Los datos se guardan localmente en tu navegador (localStorage).</p>
+                
+                <h3>Privacidad y seguridad</h3>
+                <ul>
+                    <li>Los datos se guardan localmente en tu navegador (localStorage).</li>
+                    <li>No se envía información personal a servidores externos.</li>
+                    <li>El sistema de IA y chat funciona de forma offline y local.</li>
+                    <li>Soporte para borrado completo de historial de chat y memoria IA.</li>
+                </ul>
+
+                <h3>Tips y recomendaciones</h3>
+                <ul>
+                    <li>Personaliza tu perfil para una mejor experiencia visual.</li>
+                    <li>Explora los videos con enlaces externos para ver contenido actualizado.</li>
+                    <li>Interactúa con la IA para recordar tareas o navegar rápidamente por secciones.</li>
+                    <li>Activa la música de fondo mientras exploras para una experiencia inmersiva.</li>
+                </ul>
             </div>
         </section>
     </main>
@@ -134,4 +155,3 @@
     <script src="assistant.js"></script>
 </body>
 </html>
-
