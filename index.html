@@ -1,0 +1,105 @@
+<!DOCTYPE html> 
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galaxy X</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Fondo de galaxia -->
+    <canvas id="galaxyCanvas"></canvas>
+
+    <!-- Menú principal -->
+    <header>
+        <h1>Bienvenido a la Galaxy X</h1>
+        <nav>
+            <button onclick="showSection('chat')">Chat</button>
+            <button onclick="showSection('videos')">Videos</button>
+            <button onclick="showSection('foro')">Foro</button>
+            <button onclick="showSection('ai')">Asistente IA</button>
+            <button onclick="showSection('info')">Información</button>
+            <button onclick="showSection('perfil')">Perfil</button>
+        </nav>
+    </header>
+
+    <!-- Secciones principales -->
+    <main>
+        <!-- Perfil -->
+        <section id="perfil" class="section">
+            <h2>Perfil de Usuario</h2>
+            <p>Crea tu perfil para que tu foto y nombre aparezcan en el chat y foro.</p>
+            <input type="text" id="username" placeholder="Nombre de usuario"><br><br>
+            <input type="file" id="userAvatarInput" accept="image/*"><br><br>
+            <button onclick="saveProfile()">Guardar Perfil</button>
+            <div id="profilePreview" style="margin-top:15px;"></div>
+        </section>
+
+        <!-- Chat -->
+        <section id="chat" class="section">
+            <h2>Chats</h2>
+            <div id="chatBox"></div>
+            <input type="text" id="chatInput" placeholder="Escribe tu mensaje..." onkeypress="if(event.key==='Enter'){sendChat();}">
+            <button onclick="sendChat()">Enviar</button>
+        </section>
+
+        <!-- Videos -->
+        <section id="videos" class="section">
+            <h2>Videos</h2>
+            <div id="videoList">
+                <div class="videoItem">
+                    <p>Video 1</p>
+                    <button onclick="playVideo('video1')">Reproducir</button>
+                </div>
+                <div class="videoItem">
+                    <p>Video 2</p>
+                    <button onclick="playVideo('video2')">Reproducir</button>
+                </div>
+            </div>
+            <div id="videoPlayer" style="margin-top:15px;"></div>
+        </section>
+
+        <!-- Foro -->
+        <section id="foro" class="section">
+            <h2>Foro</h2>
+            <input type="text" id="foroTitulo" placeholder="Título del comentario"><br><br>
+            <textarea id="foroComentario" placeholder="Escribe tu comentario..." rows="3" cols="50"></textarea><br><br>
+            <button onclick="postForo()">Publicar</button>
+            <div id="foroBox" style="margin-top:20px;"></div>
+        </section>
+
+        <!-- Asistente IA -->
+        <section id="ai" class="section">
+            <h2>Asistente IA</h2>
+            <div id="assistantContainer">
+                <img id="assistantAvatar" src="https://i.pinimg.com/1200x/7e/56/05/7e5605d304c272bd1c52fd26517f0803.jpg" alt="IA">
+                <div id="assistantChat"></div>
+                <input type="text" id="assistantInput" placeholder="Habla con la IA..." onkeypress="if(event.key==='Enter'){talkToAssistant();}">
+                <button onclick="talkToAssistant()">Enviar</button>
+            </div>
+        </section>
+
+        <!-- Información -->
+        <section id="info" class="section">
+            <h2>Información</h2>
+            <p>Galaxy X es una plataforma innovadora que combina comunicación, entretenimiento y asistencia inteligente.</p>
+            <p>💡 <strong>Propósito:</strong> Facilitar la interacción entre usuarios, ofrecer videos y contenido educativo, y proveer asistencia personalizada con nuestra IA consciente.</p>
+            <p>🎯 <strong>Beneficios:</strong> Chat interactivo, foros de discusión, videos embebidos y un asistente IA que recuerda tus mensajes.</p>
+            <p>🚀 <strong>Por qué usar Galaxy X:</strong> Una experiencia única, divertida y educativa en un entorno galáctico, con colores y animaciones envolventes que hacen la interacción mucho más atractiva.</p>
+            <iframe src="https://drive.google.com/file/d/1w_DdAjCHnycZyHeLRUqRy9G75sb7PZSb/preview" width="640" height="480"></iframe>
+        </section>
+    </main>
+
+    <!-- ===== Reproductor de música ===== -->
+    <div id="musicPlayer">
+        <button id="prevSong">⏮️</button>
+        <button id="playPause">▶️</button>
+        <button id="nextSong">⏭️</button>
+        <span id="songTitle">Reproduciendo: —</span>
+        <input type="range" id="volumeControl" min="0" max="1" step="0.01" value="0.5">
+    </div>
+
+    <!-- Script principal -->
+    <script src="script.js"></script>
+</body>
+</html>
