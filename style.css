@@ -1,169 +1,292 @@
-/* ===== Estilos generales ===== */
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: radial-gradient(circle at center, #8a2be2, #ff69b4);
-    color: white;
-    overflow-x: hidden;
+/* ======================================================
+   🌌 GALAXY X 2.0 — ESTILOS PRINCIPALES
+   by Gabriel & ChatGPT
+====================================================== */
+
+/* ===== Reset y base ===== */
+* {
+    box-sizing: border-box;
+    scroll-behavior: smooth;
 }
 
-/* ===== Header y menú ===== */
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    color: #fff;
+    background: radial-gradient(circle at center, #1b0033, #000010 80%);
+    overflow-x: hidden;
+    user-select: none;
+}
+
+/* ===== Scroll personalizado ===== */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #ff69b4, #8a2be2);
+    border-radius: 10px;
+}
+::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.05);
+}
+
+/* ===== Header y navegación ===== */
 header {
     text-align: center;
     padding: 20px;
-    background: rgba(0,0,0,0.3);
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(6px);
     border-bottom: 2px solid #ff69b4;
-    box-shadow: 0 0 20px rgba(255, 105, 180, 0.5);
+    box-shadow: 0 0 30px rgba(255, 105, 180, 0.6);
+    animation: headerGlow 5s ease-in-out infinite alternate;
+}
+
+@keyframes headerGlow {
+    0% { box-shadow: 0 0 20px #8a2be2; }
+    100% { box-shadow: 0 0 40px #ff69b4; }
+}
+
+nav {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 nav button {
-    margin: 5px;
-    padding: 12px 25px;
-    background-color: rgba(255, 255, 255, 0.2);
-    color: white;
+    padding: 12px 28px;
     border: none;
-    border-radius: 20px;
+    border-radius: 25px;
+    background: linear-gradient(45deg, #8a2be2, #ff69b4);
+    color: white;
+    font-weight: bold;
+    letter-spacing: 0.5px;
     cursor: pointer;
     transition: all 0.3s ease;
-    font-weight: bold;
-    box-shadow: 0 0 10px rgba(255, 105, 180, 0.4);
+    text-shadow: 0 0 5px rgba(255,255,255,0.6);
+    box-shadow: 0 0 15px rgba(255,105,180,0.4);
 }
-
 nav button:hover {
-    background-color: rgba(255, 255, 255, 0.5);
     transform: scale(1.1);
-    box-shadow: 0 0 20px rgba(255, 105, 180, 0.8);
+    box-shadow: 0 0 25px rgba(255,105,180,0.8);
+    filter: brightness(1.3);
 }
 
 /* ===== Secciones ===== */
 .section {
     display: none;
-    padding: 20px;
+    padding: 25px;
     text-align: center;
-    animation: fadeIn 0.5s ease-in-out;
+    min-height: 70vh;
+    animation: fadeIn 0.6s ease;
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
+    from { opacity: 0; transform: translateY(25px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* ===== Chat y Asistente IA ===== */
+/* ===== CHAT / ASISTENTE / FORO ===== */
 #chatBox, #assistantChat, #foroBox {
-    border: 2px solid #fff;
-    border-radius: 15px;
-    min-height: 220px;
     width: 80%;
-    margin: 15px auto;
+    margin: 20px auto;
     padding: 15px;
+    border-radius: 15px;
+    border: 1.5px solid rgba(255,255,255,0.3);
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(10px);
     overflow-y: auto;
-    background: rgba(0,0,0,0.4);
-    box-shadow: 0 0 15px rgba(255, 105, 180, 0.5);
+    min-height: 230px;
+    box-shadow: 0 0 20px rgba(255,105,180,0.4);
+    transition: 0.3s ease;
+}
+#chatBox:hover, #assistantChat:hover, #foroBox:hover {
+    box-shadow: 0 0 25px rgba(255,105,180,0.7);
 }
 
-/* Mensajes de chat con avatar */
-.message {
-    display: flex;
-    align-items: center;
-    margin-bottom: 8px;
+/* Mensajes */
+.chatMessage, .foroPost p {
+    text-align: left;
+    margin: 8px 0;
+    line-height: 1.4;
 }
 
-.message img {
-    width: 35px;
-    height: 35px;
+.chatAvatar {
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     margin-right: 10px;
     border: 2px solid #ff69b4;
     box-shadow: 0 0 10px #ff69b4;
+    vertical-align: middle;
 }
 
-.message p {
-    margin: 0;
+/* ===== Inputs generales ===== */
+input, textarea {
+    border: none;
+    border-radius: 10px;
+    padding: 8px 12px;
+    outline: none;
+    width: 60%;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+input:focus, textarea:focus {
+    background: rgba(255,255,255,0.2);
+    box-shadow: 0 0 10px rgba(255,105,180,0.6);
 }
 
-/* Estilos del contenedor de la IA */
-#assistantContainer, #profilePreview {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+/* ===== Botones ===== */
+button {
+    background: linear-gradient(45deg, #ff69b4, #8a2be2);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 10px 20px;
+    margin: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+    box-shadow: 0 0 15px rgba(255,105,180,0.4);
+}
+button:hover {
+    transform: scale(1.07);
+    box-shadow: 0 0 25px rgba(255,105,180,0.7);
 }
 
-/* Avatar de la IA */
-#assistantAvatar, .profileAvatar {
-    width: 110px;
-    height: 110px;
+/* ===== IA Avatar flotante ===== */
+#assistantAvatar {
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
     border: 3px solid #ff69b4;
-    margin-bottom: 15px;
-    box-shadow: 0 0 20px rgba(255, 105, 180, 0.7);
-    animation: floatAvatar 3s ease-in-out infinite;
+    box-shadow: 0 0 25px #ff69b4;
+    animation: floatAvatar 4s ease-in-out infinite;
 }
-
 @keyframes floatAvatar {
-    0% { transform: translateY(0px); }
+    0% { transform: translateY(0); }
     50% { transform: translateY(-10px); }
-    100% { transform: translateY(0px); }
+    100% { transform: translateY(0); }
 }
 
 /* ===== Videos ===== */
 .videoItem {
-    margin: 15px 0;
-    padding: 10px;
+    margin: 15px auto;
+    padding: 15px;
+    width: 80%;
     border-radius: 15px;
-    background: rgba(255, 255, 255, 0.1);
-    box-shadow: 0 0 10px rgba(255, 105, 180, 0.3);
-    transition: transform 0.3s, box-shadow 0.3s;
+    background: rgba(255,255,255,0.08);
+    box-shadow: 0 0 20px rgba(255,105,180,0.4);
+    transition: all 0.3s;
 }
-
 .videoItem:hover {
-    transform: scale(1.02);
-    box-shadow: 0 0 15px rgba(255, 105, 180, 0.6);
+    transform: scale(1.05);
+    box-shadow: 0 0 25px rgba(255,105,180,0.7);
 }
-
-/* Reproductor de video */
 #videoPlayer iframe {
     border-radius: 15px;
-    box-shadow: 0 0 15px rgba(255, 105, 180, 0.5);
+    box-shadow: 0 0 20px rgba(255,105,180,0.6);
 }
 
 /* ===== Foro ===== */
-#foroBox div {
-    background: rgba(255, 255, 255, 0.1);
-    margin: 10px auto;
+.foroPost {
+    background: rgba(255,255,255,0.08);
     padding: 10px;
-    border-radius: 10px;
-    width: 80%;
-    box-shadow: 0 0 10px rgba(255, 105, 180, 0.4);
+    border-radius: 12px;
+    margin-bottom: 10px;
+    box-shadow: 0 0 10px rgba(255,105,180,0.3);
+    text-align: left;
 }
 
-/* Inputs del foro y chat */
-#foroTitulo, #foroComentario, #chatInput, #assistantInput, #username {
-    border-radius: 10px;
-    border: none;
-    padding: 8px;
-    width: 60%;
-    margin-bottom: 5px;
+/* ===== Perfil ===== */
+#profilePreview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 10px;
+}
+#profilePreview img {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    border: 3px solid #ff69b4;
+    box-shadow: 0 0 20px #ff69b4;
+    animation: floatAvatar 4s ease-in-out infinite;
+}
+#profilePreview h3 {
+    margin-top: 8px;
+    text-shadow: 0 0 8px #ff69b4;
 }
 
-/* Botones de enviar */
-button {
-    border-radius: 15px;
-    border: none;
-    padding: 10px 20px;
-    background: rgba(255, 105, 180, 0.6);
+/* Mini avatar en header */
+.miniAvatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid #ff69b4;
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
+/* ===== Música ===== */
+#musicPlayer {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(0,0,0,0.7);
+    border: 2px solid #ff69b4;
+    border-radius: 30px;
+    padding: 10px 25px;
     color: white;
-    font-weight: bold;
+    box-shadow: 0 0 25px rgba(255,105,180,0.5);
+    backdrop-filter: blur(6px);
+    z-index: 1000;
+    animation: playerGlow 4s ease-in-out infinite alternate;
+}
+
+@keyframes playerGlow {
+    0% { box-shadow: 0 0 15px #ff69b4; }
+    100% { box-shadow: 0 0 35px #8a2be2; }
+}
+
+#musicPlayer button {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    color: white;
+    border: none;
+    font-size: 18px;
     cursor: pointer;
-    transition: 0.3s;
+    transition: all 0.3s;
+}
+#musicPlayer button:hover {
+    background: linear-gradient(45deg, #ff69b4, #8a2be2);
+    transform: scale(1.2);
+}
+#progressBar {
+    accent-color: #ff69b4;
+    width: 120px;
+    cursor: pointer;
+}
+#volumeControl {
+    accent-color: #ff69b4;
+    width: 70px;
+    cursor: pointer;
+}
+#songTitle {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
 }
 
-button:hover {
-    background: rgba(255, 105, 180, 0.9);
-    transform: scale(1.05);
-    box-shadow: 0 0 15px rgba(255, 105, 180, 0.7);
-}
-
-/* ===== Canvas de galaxia ===== */
+/* ===== Canvas fondo ===== */
 #galaxyCanvas {
     position: fixed;
     top: 0;
@@ -171,83 +294,21 @@ button:hover {
     width: 100%;
     height: 100%;
     z-index: -1;
+    background: transparent;
 }
 
-/* ===== Estrellas flotantes ===== */
-.star {
-    position: absolute;
-    width: 5px;
-    height: 5px;
-    background-color: #ff69b4;
-    border-radius: 50%;
-    box-shadow: 0 0 8px #ff69b4, 0 0 12px #ff69b4;
-    animation: floatStar 5s linear infinite;
+/* ===== Efecto de brillo orbital ===== */
+.glow {
+    text-shadow: 0 0 10px #ff69b4, 0 0 20px #8a2be2;
 }
 
-@keyframes floatStar {
-    0% { transform: translateY(0); }
-    50% { transform: translateY(-20px); }
-    100% { transform: translateY(0); }
+/* ===== Animación de texto flotante ===== */
+@keyframes neonPulse {
+    0% { filter: drop-shadow(0 0 5px #ff69b4); }
+    50% { filter: drop-shadow(0 0 15px #8a2be2); }
+    100% { filter: drop-shadow(0 0 5px #ff69b4); }
 }
 
-/* ===== Perfil de usuario preview ===== */
-#profilePreview img {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    margin: 10px;
-    border: 2px solid #ff69b4;
-    box-shadow: 0 0 15px #ff69b4;
-}
-
-#profilePreview p {
-    margin: 5px 0;
-    font-weight: bold;
-}
-
-/* ===== Reproductor de música ===== */
-#musicPlayer {
-    position: fixed;
-    bottom: 15px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.6);
-    border: 2px solid #ff69b4;
-    border-radius: 25px;
-    padding: 10px 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    box-shadow: 0 0 20px rgba(255, 105, 180, 0.6);
-    color: white;
-    font-weight: bold;
-    z-index: 999;
-}
-
-#musicPlayer button {
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    border-radius: 50%;
-    width: 35px;
-    height: 35px;
-    color: white;
-    font-size: 18px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-#musicPlayer button:hover {
-    background: rgba(255, 105, 180, 0.8);
-    transform: scale(1.1);
-}
-
-#songTitle {
-    font-size: 14px;
-    margin-left: 5px;
-}
-
-#volumeControl {
-    width: 80px;
-    accent-color: #ff69b4;
-    cursor: pointer;
+h2, h3 {
+    animation: neonPulse 3s infinite ease-in-out;
 }

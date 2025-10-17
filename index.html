@@ -1,8 +1,8 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Galaxy X</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -12,7 +12,15 @@
 
     <!-- Menú principal -->
     <header>
-        <h1>Bienvenido a la Galaxy X</h1>
+        <div class="header-left">
+            <h1>Bienvenido a Galaxy X</h1>
+        </div>
+
+        <div class="header-right" id="accountStatus">
+            <!-- Aquí se mostrará el avatar + nombre cuando el usuario inicie sesión -->
+            <!-- Ej: <img src="..." class="miniAvatar"><span id="accountName">Usuario</span> -->
+        </div>
+
         <nav>
             <button onclick="showSection('chat')">Chat</button>
             <button onclick="showSection('videos')">Videos</button>
@@ -25,68 +33,188 @@
 
     <!-- Secciones principales -->
     <main>
+        <!-- Cuenta / Registro -->
+        <section id="cuenta" class="section" style="display:none;">
+            <h2>Cuenta & Registro</h2>
+            <p>Crear una cuenta te permite que tu nombre, foto y correo se guarden automáticamente en este navegador.</p>
+
+            <div class="card small">
+                <h3>Crear cuenta</h3>
+                <input type="text" id="regName" placeholder="Nombre de usuario"><br><br>
+                <input type="email" id="regEmail" placeholder="Correo electrónico"><br><br>
+                <input type="password" id="regPass" placeholder="Contraseña (opcional)"><br><br>
+                <input type="file" id="regAvatar" accept="image/*"><br><br>
+                <button id="btnRegister">Crear cuenta</button>
+            </div>
+
+            <div class="card small" style="margin-top:12px;">
+                <h3>¿Ya tienes cuenta?</h3>
+                <input type="email" id="loginEmail" placeholder="Correo electrónico"><br><br>
+                <input type="password" id="loginPass" placeholder="Contraseña"><br><br>
+                <button id="btnLogin">Iniciar sesión</button>
+                <button id="btnLogout" style="display:none;">Cerrar sesión</button>
+            </div>
+
+            <p class="muted">Nota: Los datos se guardan localmente en tu navegador (localStorage). No uses información sensible aquí.</p>
+        </section>
+
         <!-- Perfil -->
         <section id="perfil" class="section">
             <h2>Perfil de Usuario</h2>
-            <p>Crea tu perfil para que tu foto y nombre aparezcan en el chat y foro.</p>
-            <input type="text" id="username" placeholder="Nombre de usuario"><br><br>
-            <input type="file" id="userAvatarInput" accept="image/*"><br><br>
-            <button onclick="saveProfile()">Guardar Perfil</button>
-            <div id="profilePreview" style="margin-top:15px;"></div>
+            <p>Crea o edita tu perfil para que tu foto y nombre aparezcan en el chat y foro.</p>
+
+            <div class="card">
+                <label for="username"><strong>Nombre de usuario</strong></label><br>
+                <input type="text" id="username" placeholder="Nombre de usuario"><br><br>
+
+                <label for="userEmail"><strong>Correo electrónico</strong></label><br>
+                <input type="email" id="userEmail" placeholder="tu@correo.com"><br><br>
+
+                <label for="userAvatarInput"><strong>Subir foto de perfil</strong></label><br>
+                <input type="file" id="userAvatarInput" accept="image/*"><br><br>
+
+                <button id="saveProfileBtn">Guardar Perfil</button>
+                <button id="editProfileBtn" style="display:none;">Editar Perfil</button>
+                <button id="clearProfileBtn">Borrar Perfil</button>
+
+                <div id="profilePreview" style="margin-top:15px;"></div>
+            </div>
+
+            <div style="margin-top:12px">
+                <button id="autoSaveToggle">Guardar automáticamente: <span id="autoSaveStatus">ON</span></button>
+                <small class="muted">Si está activado, tus cambios se guardan automáticamente.</small>
+            </div>
         </section>
 
         <!-- Chat -->
         <section id="chat" class="section">
             <h2>Chats</h2>
-            <div id="chatBox"></div>
-            <input type="text" id="chatInput" placeholder="Escribe tu mensaje..." onkeypress="if(event.key==='Enter'){sendChat();}">
-            <button onclick="sendChat()">Enviar</button>
+
+            <div class="controls">
+                <button id="clearChatBtn">Borrar historial</button>
+                <button id="saveChatBtn">Guardar historial</button>
+                <button id="loadChatBtn">Cargar historial</button>
+            </div>
+
+            <div id="chatBox" class="card large"></div>
+
+            <div class="chat-input">
+                <input type="text" id="chatInput" placeholder="Escribe tu mensaje..." onkeypress="if(event.key==='Enter'){sendChat();}">
+                <button onclick="sendChat()">Enviar</button>
+            </div>
         </section>
 
         <!-- Videos -->
         <section id="videos" class="section">
-            <h2>Videos</h2>
-            <div id="videoList">
+            <h2>Videos & Streams</h2>
+
+            <p>Explora streams en vivo, videos recomendados y lista tus favoritos. (Aquí puedes añadir más contenido dinámicamente.)</p>
+
+            <div id="videoList" class="card">
                 <div class="videoItem">
-                    <p>Video 1</p>
+                    <p><strong>Demo — Stream: Noche Galáctica</strong></p>
                     <button onclick="playVideo('video1')">Reproducir</button>
+                    <button onclick="favoriteVideo('video1')">❤ Favorito</button>
                 </div>
+
                 <div class="videoItem">
-                    <p>Video 2</p>
+                    <p><strong>Video 2 — Guía de Galaxy X</strong></p>
                     <button onclick="playVideo('video2')">Reproducir</button>
+                    <button onclick="favoriteVideo('video2')">❤ Favorito</button>
                 </div>
             </div>
-            <div id="videoPlayer" style="margin-top:15px;"></div>
+
+            <div id="videoPlayer" style="margin-top:15px;" class="card small"></div>
+
+            <div style="margin-top:10px;">
+                <button id="addVideoBtn">Agregar video (demo)</button>
+            </div>
         </section>
 
         <!-- Foro -->
         <section id="foro" class="section">
             <h2>Foro</h2>
-            <input type="text" id="foroTitulo" placeholder="Título del comentario"><br><br>
-            <textarea id="foroComentario" placeholder="Escribe tu comentario..." rows="3" cols="50"></textarea><br><br>
-            <button onclick="postForo()">Publicar</button>
+
+            <div class="card">
+                <input type="text" id="foroTitulo" placeholder="Título del comentario"><br><br>
+                <textarea id="foroComentario" placeholder="Escribe tu comentario..." rows="4" cols="60"></textarea><br><br>
+                <button onclick="postForo()">Publicar</button>
+            </div>
+
             <div id="foroBox" style="margin-top:20px;"></div>
         </section>
 
         <!-- Asistente IA -->
         <section id="ai" class="section">
             <h2>Asistente IA</h2>
-            <div id="assistantContainer">
-                <img id="assistantAvatar" src="https://i.pinimg.com/1200x/7e/56/05/7e5605d304c272bd1c52fd26517f0803.jpg" alt="IA">
-                <div id="assistantChat"></div>
-                <input type="text" id="assistantInput" placeholder="Habla con la IA..." onkeypress="if(event.key==='Enter'){talkToAssistant();}">
-                <button onclick="talkToAssistant()">Enviar</button>
+
+            <div class="ai-wrap card">
+                <div class="ai-top">
+                    <img id="assistantAvatar" src="https://i.pinimg.com/1200x/7e/56/05/7e5605d304c272bd1c52fd26517f0803.jpg" alt="IA" class="ai-avatar">
+                    <div>
+                        <h3>Galaxy IA</h3>
+                        <p class="muted">Asistente con memoria y acciones rápidas.</p>
+                    </div>
+                </div>
+
+                <div id="assistantChat" class="ai-chat"></div>
+
+                <div class="ai-controls">
+                    <input type="text" id="assistantInput" placeholder="Habla con la IA..." onkeypress="if(event.key==='Enter'){talkToAssistant();}">
+                    <button onclick="talkToAssistant()">Enviar</button>
+                    <button id="saveTopicsBtn">Marcar tema importante</button>
+                    <button id="clearAIBtn">Borrar memoria reciente</button>
+                </div>
+
+                <div class="ai-help muted" style="margin-top:8px;">
+                    Consejos: prueba frases como "Recuérdame que estudio JS", "Llévame a Videos", "¿Qué guardé?".
+                </div>
             </div>
         </section>
 
         <!-- Información -->
         <section id="info" class="section">
             <h2>Información</h2>
-            <p>Galaxy X es una plataforma innovadora que combina comunicación, entretenimiento y asistencia inteligente.</p>
-            <p>💡 <strong>Propósito:</strong> Facilitar la interacción entre usuarios, ofrecer videos y contenido educativo, y proveer asistencia personalizada con nuestra IA consciente.</p>
-            <p>🎯 <strong>Beneficios:</strong> Chat interactivo, foros de discusión, videos embebidos y un asistente IA que recuerda tus mensajes.</p>
-            <p>🚀 <strong>Por qué usar Galaxy X:</strong> Una experiencia única, divertida y educativa en un entorno galáctico, con colores y animaciones envolventes que hacen la interacción mucho más atractiva.</p>
-            <iframe src="https://drive.google.com/file/d/1w_DdAjCHnycZyHeLRUqRy9G75sb7PZSb/preview" width="640" height="480"></iframe>
+
+            <div class="card">
+                <h3>¿Qué es Galaxy X?</h3>
+                <p>
+                    Galaxy X es una plataforma experimental creada para reunir en un solo lugar:
+                    chats en tiempo real, foros de discusión, videos y streams, y un asistente IA con memoria.
+                    Está pensada para comunidades creativas que quieren interactuar en un entorno visual atractivo.
+                </p>
+
+                <h3>Funciones principales</h3>
+                <ul>
+                    <li><strong>Chats:</strong> conversaciones públicas y privadas, con avatar y nombre mostrado.</li>
+                    <li><strong>Foros:</strong> publica temas, responde y comparte ideas; las entradas muestran tu perfil.</li>
+                    <li><strong>Videos y streams:</strong> embebe reproductores, guarda favoritos y crea listas de reproducción.</li>
+                    <li><strong>Asistente IA:</strong> memoria de conversación, acciones (ir a secciones), y recordatorios básicos.</li>
+                    <li><strong>Perfil & cuenta:</strong> registro con correo, perfil persistente en tu navegador (localStorage).</li>
+                </ul>
+
+                <h3>Por qué usar Galaxy X</h3>
+                <p>
+                    Galaxy X combina entretenimiento y utilidad: puedes ver streams, aprender con videos, 
+                    discutir en foros y pedir ayuda a una IA que recuerda tus gustos. Es ideal para comunidades,
+                    grupos de estudio y creadores de contenido que quieren un espacio con estilo.
+                </p>
+
+                <h3>Privacidad y almacenamiento</h3>
+                <p class="muted">
+                    Importante: por ahora los datos se guardan en tu navegador (localStorage). No es seguro para
+                    información sensible. En futuras versiones se puede integrar una base de datos segura.
+                </p>
+
+                <h3>Comenzar</h3>
+                <ol>
+                    <li>Crea una cuenta en la sección <em>Perfil</em> o registra un nuevo usuario.</li>
+                    <li>Personaliza tu avatar para que se muestre en chats y foro.</li>
+                    <li>Explora videos, chatea y prueba la IA.</li>
+                </ol>
+
+                <iframe src="https://drive.google.com/file/d/1w_DdAjCHnycZyHeLRUqRy9G75sb7PZSb/preview" width="640" height="360"></iframe>
+            </div>
         </section>
     </main>
 
