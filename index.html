@@ -1,157 +1,254 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Galaxy X</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galaxy X | Hub Galáctico</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="https://i.ibb.co/6y40F2r/default-avatar.png">
 </head>
-<body>
-    <!-- Fondo galáctico animado -->
+<body data-theme="galaxy">
+
+    <!-- FONDO GALÁCTICO DINÁMICO -->
     <canvas id="galaxyCanvas"></canvas>
 
-    <!-- Barra lateral estilo Discord -->
-    <aside id="sidebar">
-        <h1>Galaxy X</h1>
+    <!-- SIDEBAR -->
+    <aside id="sidebar" role="navigation" aria-label="Navegación principal del Hub Galáctico">
+        <header>
+            <h1 class="glow-title">Galaxy X 4.2</h1>
+        </header>
+
+        <!-- Selector de tema -->
+        <div id="themeSelector" class="control-group">
+            <label for="themeSelect">Tema:</label>
+            <select id="themeSelect" aria-label="Seleccionar tema de color">
+                <option value="galaxy">🌌 Galaxia (Defecto)</option>
+                <option value="ocean">🌊 Océano</option>
+                <option value="lava">🔥 Lava</option>
+                <option value="neon">⚡ Neón Verde</option>
+                <option value="custom">🌈 Color Personalizado</option>
+            </select>
+            <input type="color" id="customColorInput" style="display: none;">
+        </div>
+
+        <!-- Navegación principal -->
         <nav>
-            <button onclick="showSection('chat')">💬 Chat</button>
-            <button onclick="showSection('videos')">🎥 Videos</button>
-            <button onclick="showSection('foro')">📝 Foro</button>
-            <button onclick="showSection('ai')">🤖 IA</button>
-            <button onclick="showSection('info')">ℹ️ Info</button>
-            <button onclick="showSection('perfil')">👤 Perfil</button>
-            <button onclick="toggleBackgroundMusic()">🎵 Música Galaxy X</button>
+            <ul>
+                <li><button class="nav-btn active" data-section="chat">💬 Chat General</button></li>
+                <li><button class="nav-btn" data-section="videos">🎥 Videos</button></li>
+                <li><button class="nav-btn" data-section="foro">📜 Foro</button></li>
+                <li><button class="nav-btn" data-section="assistant">🤖 Asistente IA</button></li>
+                <li><button class="nav-btn" data-section="musicAdvanced">🎵 Música</button></li>
+                <li><button class="nav-btn" data-section="perfil">👤 Perfil</button></li>
+                <li><button class="nav-btn" data-section="info">ℹ️ Info</button></li>
+            </ul>
         </nav>
-        <div id="accountStatusSidebar"></div>
+
+        <!-- Estado del perfil -->
+        <div id="accountStatusSidebar" class="status-indicator">
+            <span id="profileUsernameDisplay">Cargando Perfil...</span>
+        </div>
     </aside>
 
-    <!-- Contenido principal -->
-    <main id="mainContent">
-        <!-- Perfil -->
-        <section id="perfil" class="section">
-            <h2>Perfil de Usuario</h2>
-            <div class="card">
-                <label for="username">Nombre de usuario</label><br>
-                <input type="text" id="username" placeholder="Nombre de usuario"><br><br>
-                <label for="userEmail">Correo electrónico</label><br>
-                <input type="email" id="userEmail" placeholder="tu@correo.com"><br><br>
-                <label for="userAvatarInput">Subir foto de perfil</label><br>
-                <input type="file" id="userAvatarInput" accept="image/*"><br><br>
-                <button id="saveProfileBtn">Guardar Perfil</button>
-                <button id="clearProfileBtn">Borrar Perfil</button>
-                <div id="profilePreview" style="margin-top:15px;"></div>
-            </div>
-        </section>
+    <!-- CONTENIDO PRINCIPAL -->
+    <main id="mainContent" role="main" aria-live="polite">
 
-        <!-- Chat General -->
+        <!-- CHAT GENERAL (ESTILO DISCORD) -->
         <section id="chat" class="section">
-            <h2>Canal Chat General</h2>
-            <div class="controls">
-                <button id="clearChatBtn">Borrar historial</button>
-                <button id="saveChatBtn">Guardar historial</button>
-                <button id="loadChatBtn">Cargar historial</button>
-            </div>
-            <div id="chatBox" class="card large"></div>
-            <div class="chat-input">
-                <input type="text" id="chatInput" placeholder="Escribe tu mensaje..." onkeypress="if(event.key==='Enter'){sendChat();}">
-                <button onclick="sendChat()">Enviar</button>
-            </div>
-        </section>
-
-        <!-- Videos -->
-        <section id="videos" class="section">
-            <h2>Videos & Streams</h2>
-            <p>Explora streams en vivo, videos recomendados y favoritos.</p>
-            <div class="video-search card">
-                <input type="text" id="youtubeLink" placeholder="Pega el enlace de YouTube aquí">
-                <button onclick="playYoutubeLink()">Reproducir</button>
-            </div>
-            <div id="videoList" class="card"></div>
-            <div id="videoPlayer" class="card small" style="margin-top:15px;"></div>
-            <button id="addVideoBtn" style="margin-top:10px;">Agregar video demo</button>
-        </section>
-
-        <!-- Foro -->
-        <section id="foro" class="section">
-            <h2>Foro</h2>
-            <div class="card">
-                <input type="text" id="foroTitulo" placeholder="Título del comentario"><br><br>
-                <textarea id="foroComentario" placeholder="Escribe tu comentario..." rows="4" cols="60"></textarea><br><br>
-                <button onclick="postForo()">Publicar</button>
-            </div>
-            <div id="foroBox" style="margin-top:20px;"></div>
-        </section>
-
-        <!-- Asistente IA -->
-        <section id="ai" class="section">
-            <h2>Canal Asistente IA</h2>
-            <div class="ai-wrap card">
-                <div class="ai-top">
-                    <img id="assistantAvatar" src="https://i.pinimg.com/1200x/7e/56/05/7e5605d304c272bd1c52fd26517f0803.jpg" alt="IA" class="ai-avatar">
-                    <div>
-                        <h3>Galaxy IA</h3>
-                        <p class="muted">IA consciente, memoria avanzada y comandos rápidos.</p>
+            <h2 class="section-title glow">💬 Chat General</h2>
+            <div class="chat-layout">
+                <!-- Lista de servidores -->
+                <div id="serverList" class="server-list card">
+                    <h3>Servidores</h3>
+                    <ul id="servers">
+                        <li class="server-item active" data-server="general">🌌 General</li>
+                        <!-- Más servidores se agregarán dinámicamente -->
+                    </ul>
+                    <button id="addServerBtn" class="add-btn">➕</button>
+                </div>
+                <!-- Lista de canales y amigos -->
+                <div id="channelList" class="channel-list card">
+                    <h3>Canales</h3>
+                    <ul id="channels">
+                        <li class="channel-item active" data-channel="general">#general</li>
+                        <!-- Más canales se agregarán dinámicamente -->
+                    </ul>
+                    <h3>Amigos</h3>
+                    <ul id="friends">
+                        <li class="friend-item">👤 Usuario1 (En línea)</li>
+                        <!-- Más amigos se agregarán dinámicamente -->
+                    </ul>
+                    <button id="addFriendBtn" class="add-btn">➕ Añadir Amigo</button>
+                </div>
+                <!-- Chat principal -->
+                <div class="chat-main">
+                    <div id="chatBox" class="card large chat-messages-container" role="log"></div>
+                    <div class="chat-input-area">
+                        <input type="text" id="chatInput" placeholder="Escribe tu mensaje y presiona Enter..." class="input-full">
+                        <button id="sendChatBtn" class="primary-btn">Enviar</button>
+                        <button id="voiceChatBtn" class="secondary-btn">🎤 Voz</button>
                     </div>
                 </div>
-                <div id="assistantChat" class="ai-chat"></div>
+            </div>
+        </section>
+
+        <!-- ASISTENTE IA -->
+        <section id="assistant" class="section hidden">
+            <h2 class="section-title glow">🤖 Asistente IA</h2>
+            <div class="ai-wrap card">
+                <div class="ai-top">
+                    <img id="assistantAvatar" src="assets/img/ai_avatar.jpg" alt="Avatar IA" class="ai-avatar floating-circle">
+                    <div class="ai-info-text">
+                        <h3>Luna</h3>
+                        <p class="muted">Tu copiloto cósmico, lista para charlar y ayudar.</p>
+                    </div>
+                </div>
+                <div id="assistantChat" class="ai-chat large chat-messages-container" role="log"></div>
                 <div class="ai-controls">
-                    <input type="text" id="assistantInput" placeholder="Habla con la IA..." onkeypress="if(event.key==='Enter'){talkToAssistant();}">
-                    <button onclick="talkToAssistant()">Enviar</button>
-                    <button id="clearAIBtn">Borrar memoria reciente</button>
-                </div>
-                <div class="ai-help muted" style="margin-top:8px;">
-                    Consejos: prueba "Recuérdame que estudio JS", "Llévame a Videos", "¿Qué guardé?".
+                    <input type="text" id="assistantInput" placeholder="Habla con Luna..." class="input-full">
+                    <button id="sendAIBtn" class="primary-btn">Enviar</button>
+                    <button id="clearAIBtn" class="secondary-btn">🧠 Borrar Memoria</button>
                 </div>
             </div>
         </section>
 
-        <!-- Información -->
-        <section id="info" class="section">
-            <h2>Información</h2>
-            <div class="card">
+        <!-- VIDEOS -->
+        <section id="videos" class="section hidden">
+            <h2 class="section-title glow">🎥 Proyector Galáctico</h2>
+            <div class="card video-search-bar">
+                <input type="text" id="youtubeSearch" placeholder="Buscar video por nombre..." class="input-full">
+                <button id="searchYoutubeBtn" class="primary-btn">Buscar</button>
+            </div>
+            <div class="card video-input-bar">
+                <input type="text" id="youtubeLink" placeholder="O pega el enlace de YouTube aquí..." class="input-full">
+                <button id="playYoutubeBtn" class="primary-btn">Reproducir</button>
+            </div>
+            <div id="videoPlayer" class="card video-player-container">
+                <p>Selecciona un video para reproducir.</p>
+            </div>
+            <div id="searchResults" class="card search-results"></div>
+        </section>
+
+        <!-- FORO (ESTILO REDDIT) -->
+        <section id="foro" class="section hidden">
+            <h2 class="section-title glow">📜 Foro Cósmico</h2>
+            <div class="foro-layout">
+                <!-- Subreddits -->
+                <div id="subreddits" class="subreddits card">
+                    <h3>Subreddits</h3>
+                    <ul>
+                        <li class="subreddit-item active" data-sub="general">r/general</li>
+                        <!-- Más subreddits dinámicos -->
+                    </ul>
+                    <button id="createSubredditBtn" class="add-btn">➕ Crear Subreddit</button>
+                </div>
+                <!-- Posts -->
+                <div class="foro-main">
+                    <div class="card foro-post-creator">
+                        <input type="text" id="foroTitulo" placeholder="Título del Post" class="input-full">
+                        <textarea id="foroComentario" placeholder="Tu mensaje..." class="input-full" rows="4"></textarea>
+                        <button id="postForoBtn" class="primary-btn">Publicar Post</button>
+                    </div>
+                    <div id="foroBox" class="card large foro-posts"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MÚSICA -->
+        <section id="musicAdvanced" class="section hidden">
+            <h2 class="section-title glow">🎧 Central Galáctica de Sonido</h2>
+            <div class="card music-search-bar">
+                <input type="text" id="musicSearch" placeholder="Buscar canción por nombre..." class="input-full">
+                <button id="searchMusicBtn" class="primary-btn">Buscar</button>
+            </div>
+            <div class="card music-input-bar">
+                <input type="text" id="musicLink" placeholder="O pega el enlace de la canción..." class="input-full">
+                <button id="playMusicBtn" class="primary-btn">Reproducir</button>
+            </div>
+            <div class="card new-music-player">
+                <div class="music-display">
+                    <img id="albumArt" src="assets/img/galaxy_music.jpg" alt="Carátula" class="album-art">
+                    <div class="song-info">
+                        <h3 id="songTitle">Ninguna canción</h3>
+                        <p id="songArtist">Selecciona una canción para comenzar</p>
+                    </div>
+                </div>
+                <div class="music-controls">
+                    <button id="prevTrack">⏮️</button>
+                    <button id="playPause" data-state="paused">▶️</button>
+                    <button id="nextTrack">⏭️</button>
+                </div>
+                <input type="range" id="trackProgress" min="0" max="100" value="0">
+                <div class="time-display">
+                    <span id="currentTime">0:00</span>
+                    <span id="totalTime">0:00</span>
+                </div>
+                <div class="volume-control">
+                    <label for="volumeSlider">🔊 Volumen</label>
+                    <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.5">
+                </div>
+                <div id="galaxyVisualizer" class="galaxy-visualizer"></div>
+                <div class="galaxy-music-section">
+                    <h4>🎵 Música de GalaxyX</h4>
+                    <button class="song-btn galaxy-song" data-src="assets/audio/Mirror_Temple.mp3" data-title="Mirror Temple" data-artist="Celeste OST">🎵 Mirror Temple</button>
+                    <button class="song-btn galaxy-song" data-src="assets/audio/Ender.mp3" data-title="Ender" data-artist="Mythic Beats">🎵 Ender</button>
+                </div>
+                <div id="musicSearchResults" class="search-results"></div>
+            </div>
+        </section>
+
+        <!-- PERFIL -->
+        <section id="perfil" class="section hidden">
+            <h2 class="section-title glow">👤 Configuración de Perfil</h2>
+            <div class="card profile-config-card">
+                <label for="username">Nombre:</label>
+                <input type="text" id="username" placeholder="Nombre de usuario" class="input-full">
+                <label for="userEmail">Correo electrónico:</label>
+                <input type="email" id="userEmail" placeholder="tu@correo.com" class="input-full">
+                <label for="userAvatarInput">Subir avatar:</label>
+                <input type="file" id="userAvatarInput" accept="image/png, image/jpeg">
+                <div class="profile-actions">
+                    <button id="saveProfileBtn" class="primary-btn">Guardar Perfil</button>
+                    <button id="clearProfileBtn" class="danger-btn">Borrar Perfil</button>
+                </div>
+                <div id="profilePreview" class="profile-preview"></div>
+            </div>
+        </section>
+
+        <!-- INFO -->
+        <section id="info" class="section hidden">
+            <h2 class="section-title glow">ℹ️ Información</h2>
+            <div class="card info-card">
                 <h3>¿Qué es Galaxy X?</h3>
-                <p>Galaxy X es una plataforma de entretenimiento y productividad digital con enfoque en chat, foros, videos y un asistente IA avanzado con memoria activa y acciones inteligentes.</p>
-                
-                <h3>Funciones principales</h3>
+                <p>Galaxy X es una aplicación web tipo hub galáctico que combina funcionalidades de plataformas populares como Discord, TikTok, YouTube y Reddit en una sola interfaz interactiva y personalizable. Su enfoque es social, multimedia y gamificado, con un estilo moderno, dinámico y espacial.</p>
+                <p><strong>Objetivos principales:</strong></p>
                 <ul>
-                    <li>Canales de chat con avatar y nombre de usuario.</li>
-                    <li>Foros con publicación moderna y moderación básica.</li>
-                    <li>Videos y streams con reproductor embebido y soporte para enlaces externos.</li>
-                    <li>Asistente IA con memoria, recordatorios y comandos de navegación.</li>
-                    <li>Perfil de usuario con foto, correo y configuración persistente.</li>
-                    <li>Música de fondo reproducible mientras navegas por la plataforma.</li>
+                    <li>Chat general y privado con un asistente IA.</li>
+                    <li>Reproducción de música y videos de YouTube con controles avanzados y efectos visuales.</li>
+                    <li>Publicación y consulta de contenido tipo foro o microblog.</li>
+                    <li>Gestión de perfil de usuario con avatar y datos personales.</li>
+                    <li>Personalización de temas de colores y fondos galácticos interactivos.</li>
+                    <li>Interfaz responsive y accesible desde cualquier dispositivo.</li>
                 </ul>
-                
-                <h3>Privacidad y seguridad</h3>
-                <ul>
-                    <li>Los datos se guardan localmente en tu navegador (localStorage).</li>
-                    <li>No se envía información personal a servidores externos.</li>
-                    <li>El sistema de IA y chat funciona de forma offline y local.</li>
-                    <li>Soporte para borrado completo de historial de chat y memoria IA.</li>
-                </ul>
-
-                <h3>Tips y recomendaciones</h3>
-                <ul>
-                    <li>Personaliza tu perfil para una mejor experiencia visual.</li>
-                    <li>Explora los videos con enlaces externos para ver contenido actualizado.</li>
-                    <li>Interactúa con la IA para recordar tareas o navegar rápidamente por secciones.</li>
-                    <li>Activa la música de fondo mientras exploras para una experiencia inmersiva.</li>
-                </ul>
+                <p>¡Explora el universo de Galaxy X y conecta con otros usuarios en este espacio cósmico!</p>
+                <h4>Video de Introducción</h4>
+                <iframe src="https://drive.google.com/file/d/1w_DdAjCHnycZyHeLRUqRy9G75sb7PZSb/preview" width="100%" height="315" allowfullscreen></iframe>
+                <p>Si no se carga, <a href="https://drive.google.com/file/d/1w_DdAjCHnycZyHeLRUqRy9G75sb7PZSb/view" target="_blank">haz clic aquí para verlo</a>.</p>
             </div>
         </section>
+
     </main>
 
-    <!-- Reproductor de música -->
-    <div id="musicPlayer">
-        <button id="prevSong">⏮️</button>
-        <button id="playPause">▶️</button>
-        <button id="nextSong">⏭️</button>
-        <span id="songTitle">Reproduciendo: —</span>
-        <input type="range" id="volumeControl" min="0" max="1" step="0.01" value="0.5">
+    <!-- REPRODUCTOR FLOTANTE DE MÚSICA -->
+    <div class="music-player">
+        <button id="miniPrev">⏮️</button>
+        <button id="miniPlayPause" data-state="paused">▶️</button>
+        <button id="miniNext">⏭️</button>
+        <span id="currentSongTitle">Ninguna canción</span>
+        <input type="range" id="miniVolume" min="0" max="1" step="0.01" value="0.5">
     </div>
 
-    <!-- Scripts -->
     <script src="script.js"></script>
-    <script src="assistant.js"></script>
 </body>
 </html>

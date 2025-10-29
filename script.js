@@ -1,502 +1,695 @@
-/* ==========================
-   🌌 GALAXY X — script.js
-   Versión: integración música de fondo + buscador YouTube + mejoras
-========================== */
+/* =========================================
+   🌠 GALAXY X — script.js COMPLETO MEJORADO (V9.0)
+   - Funcionalidades avanzadas: Chat Discord-like, Foro Reddit, Búsquedas, IA coherente, Efectos galácticos intensos
+========================================= */
 
-/* ==========================
-   🌐 Sistema de secciones
-========================== */
-function showSection(sectionId) {
-    document.querySelectorAll('.section').forEach(sec => sec.style.display = 'none');
-    const el = document.getElementById(sectionId);
-    if (el) el.style.display = 'block';
+/* ---------------------------
+   UTILITIES
+----------------------------*/
+const on = (sel, ev, fn) => document.querySelector(sel)?.addEventListener(ev, fn);
+const byId = id => document.getElementById(id);
+
+/* ============================
+   0) VARIABLES GLOBALES
+============================*/
+let currentIndex = 0;
+let isPlaying = false;
+let visualizerRunning = false;
+let analyser, bufferLength, dataArray, audioCtx, sourceNode;
+window.IA_AVATAR = 'assets/img/ai_avatar.jpg';
+window.IA_NAME = 'Luna'; // Cambiado a Luna, IA chica
+window.aiMemory = window.aiMemory || [];
+let servers = JSON.parse(localStorage.getItem('gx_servers')) || [{ name: 'General', channels: ['general'], active: true }];
+let friends = JSON.parse(localStorage.getItem('gx_friends')) || [];
+let subreddits = JSON.parse(localStorage.getItem('gx_subreddits')) || [{ name: 'general', posts: [], active: true }];
+let currentServer = 0;
+let currentChannel = 'general';
+let currentSubreddit = 'general';
+
+/* ============================
+   1) AUDIO / MÚSICA
+============================*/
+const songs = [
+  { title: 'Mirror Temple', src: 'assets/audio/Mirror_Temple.mp3', artist: 'Celeste OST', isGalaxy: true },
+  { title: 'Ender', src: 'assets/audio/Ender.mp3', artist: 'Mythic Beats', isGalaxy: true }
+];
+
+const music = new Audio();
+music.src = songs[currentIndex].src;
+music.volume = parseFloat(localStorage.getItem('gx_volume')) || 0.5;
+
+const toggleMusicBtn = byId('playPause');
+const prevSongBtn = byId('prevTrack');
+const nextSongBtn = byId('nextTrack');
+const songTitle = byId('songTitle');
+const progress = byId('trackProgress');
+const currentTimeEl = byId('currentTime');
+const durationEl = byId('totalTime');
+const volumeSlider = byId('volumeSlider');
+const miniPlayPause = byId('miniPlayPause');
+const miniPrev = byId('miniPrev');
+const miniNext = byId('miniNext');
+const currentSongTitle = byId('currentSongTitle');
+const miniVolume = byId('miniVolume');
+
+/* Mostrar título inicial */
+if (songTitle) songTitle.textContent = `🎵 ${songs[currentIndex].title}`;
+if (currentSongTitle) currentSongTitle.textContent = songs[currentIndex].title;
+
+/* Actualiza progreso y tiempo */
+music.addEventListener('timeupdate', () => {
+  if (progress) progress.value = music.currentTime;
+  if (currentTimeEl) currentTimeEl.textContent = formatTime(music.currentTime);
+});
+
+/* Carga duración */
+music.addEventListener('loadedmetadata', () => {
+  if (progress) progress.max = music.duration;
+  if (durationEl) durationEl.textContent = formatTime(music.duration);
+});
+
+/* Cambio manual de progreso */
+progress?.addEventListener('input', () => music.currentTime = progress.value);
+
+/* Volumen */
+volumeSlider?.addEventListener('input', () => {
+  music.volume = volumeSlider.value;
+  miniVolume.value = volumeSlider.value;
+  localStorage.setItem('gx_volume', music.volume);
+});
+miniVolume?.addEventListener('input', () => {
+  music.volume = miniVolume.value;
+  volumeSlider.value = miniVolume.value;
+  localStorage.setItem('gx_volume', music.volume);
+});
+
+/* Al terminar una canción */
+music.addEventListener('ended', () => {
+  currentIndex = (currentIndex + 1) % songs.length;
+  changeSong();
+});
+
+/* Play/Pause */
+const togglePlayPause = () => {
+  if (isPlaying) {
+    music.pause();
+    isPlaying = false;
+    toggleMusicBtn.textContent = '▶️';
+    miniPlayPause.textContent = '▶️';
+    stopVisualizer();
+    deactivateGalaxyEffect();
+  } else {
+    music.play().catch(() => {});
+    isPlaying = true;
+    toggleMusicBtn.textContent = '⏸️';
+    miniPlayPause.textContent = '⏸️';
+    startVisualizer();
+    if (songs[currentIndex].isGalaxy) activateGalaxyEffect();
+  }
+};
+toggleMusicBtn?.addEventListener('click', togglePlayPause);
+miniPlayPause?.addEventListener('click', togglePlayPause);
+
+/* Canción siguiente / anterior */
+nextSongBtn?.addEventListener('click', () => {
+  currentIndex = (currentIndex + 1) % songs.length;
+  changeSong();
+});
+miniNext?.addEventListener('click', () => {
+  currentIndex = (currentIndex + 1) % songs.length;
+  changeSong();
+});
+prevSongBtn?.addEventListener('click', () => {
+  currentIndex = (currentIndex - 1 + songs.length) % songs.length;
+  changeSong();
+});
+miniPrev?.addEventListener('click', () => {
+  currentIndex = (currentIndex - 1 + songs.length) % songs.length;
+  changeSong();
+});
+
+/* Cambiar canción */
+function changeSong() {
+  music.src = songs[currentIndex].src;
+  if (songTitle) songTitle.textContent = `🎵 ${songs[currentIndex].title}`;
+  if (currentSongTitle) currentSongTitle.textContent = songs[currentIndex].title;
+  if (isPlaying) {
+    music.play().catch(() => {});
+    startVisualizer();
+    if (songs[currentIndex].isGalaxy) activateGalaxyEffect();
+  } else {
+    stopVisualizer();
+    deactivateGalaxyEffect();
+  }
 }
-showSection('chat');
 
-/* ==========================
-   ✨ Fondo galáctico + visualizador
-========================== */
-const canvas = document.getElementById('galaxyCanvas');
-const ctx = canvas ? canvas.getContext('2d') : null;
-if (canvas && ctx) {
-    canvas.width = innerWidth;
-    canvas.height = innerHeight;
-    window.addEventListener('resize', () => {
-        canvas.width = innerWidth;
-        canvas.height = innerHeight;
+/* Formato de tiempo */
+function formatTime(sec) {
+  if (!sec || isNaN(sec)) return '0:00';
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60).toString().padStart(2, '0');
+  return `${m}:${s}`;
+}
+
+/* ============================
+   1.1) VISUALIZADOR DE MÚSICA Y EFECTOS GALÁCTICOS
+============================*/
+function startVisualizer() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    sourceNode = audioCtx.createMediaElementSource(music);
+    analyser = audioCtx.createAnalyser();
+    sourceNode.connect(analyser);
+    analyser.connect(audioCtx.destination);
+    analyser.fftSize = 256;
+    bufferLength = analyser.frequencyBinCount;
+    dataArray = new Uint8Array(bufferLength);
+  }
+  visualizerRunning = true;
+  drawVisualizer();
+}
+
+function stopVisualizer() {
+  visualizerRunning = false;
+  const viz = byId('galaxyVisualizer');
+  if (viz) viz.style.background = 'transparent';
+}
+
+function drawVisualizer() {
+  if (!visualizerRunning) return;
+  requestAnimationFrame(drawVisualizer);
+  analyser.getByteFrequencyData(dataArray);
+  const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+  const viz = byId('galaxyVisualizer');
+  if (viz) {
+    const color = `rgba(${Math.min(avg * 2, 255)}, 0, ${255 - Math.min(avg, 255)}, 0.4)`;
+    viz.style.background = `radial-gradient(circle, ${color} 0%, transparent 70%)`;
+    viz.style.boxShadow = `0 0 ${avg / 2}px ${avg / 3}px ${color}`;
+  }
+}
+
+function activateGalaxyEffect() {
+  const canvas = byId('galaxyCanvas');
+  if (canvas) canvas.classList.add('galaxy-active');
+}
+
+function deactivateGalaxyEffect() {
+  const canvas = byId('galaxyCanvas');
+  if (canvas) canvas.classList.remove('galaxy-active');
+}
+
+/* ============================
+   2) TEMAS DINÁMICOS
+============================*/
+const themeSelect = byId('themeSelect');
+const customColorInput = byId('customColorInput');
+themeSelect?.addEventListener('change', () => {
+  const theme = themeSelect.value;
+  document.body.setAttribute('data-theme', theme);
+  localStorage.setItem('gx_theme', theme);
+  if (theme === 'custom') {
+    customColorInput.style.display = 'block';
+    customColorInput.addEventListener('input', () => {
+      document.documentElement.style.setProperty('--color-primary', customColorInput.value);
     });
-}
+  } else {
+    customColorInput.style.display = 'none';
+  }
+});
 
-const stars = Array.from({ length: 250 }, () => ({
-    x: (canvas ? Math.random() * canvas.width : 0),
-    y: (canvas ? Math.random() * canvas.height : 0),
-    r: Math.random() * 2 + 1,
-    alpha: Math.random()
+/* ============================
+   3) FONDO GALÁCTICO
+============================*/
+const canvas = byId('galaxyCanvas');
+const ctx = canvas?.getContext('2d');
+let w = canvas ? canvas.width = innerWidth : innerWidth;
+let h = canvas ? canvas.height = innerHeight : innerHeight;
+
+addEventListener('resize', () => {
+  w = canvas ? canvas.width = innerWidth : innerWidth;
+  h = canvas ? canvas.height = innerHeight : innerHeight;
+});
+
+canvas && (canvas.style.pointerEvents = 'none');
+
+const baseStars = Array.from({ length: 220 }, () => ({
+  x: Math.random() * w,
+  y: Math.random() * h,
+  r: Math.random() * 1.8 + 0.4,
+  alpha: Math.random() * 0.9,
+  speed: Math.random() * 0.5 + 0.1
 }));
 
-let audioCtx, analyser, dataArray, bufferLength;
+function draw() {
+  if (!ctx) return;
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = 'rgba(10,6,30,0.95)';
+  ctx.fillRect(0, 0, w, h);
 
-function drawGalaxy() {
-    if (!ctx) return;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  for (let s of baseStars) {
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255,255,255,${s.alpha})`;
+    ctx.fill();
+    s.alpha += (Math.random() - 0.5) * 0.02;
+    if (s.alpha < 0.25) s.alpha = 0.6;
+    if (s.alpha > 1) s.alpha = 0.6;
+  }
 
-    // estrellas
-    for (const s of stars) {
-        ctx.beginPath();
-        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255,255,255,${s.alpha})`;
-        ctx.fill();
-        s.alpha += (Math.random() - 0.5) * 0.02;
-        if (s.alpha < 0.25) s.alpha = Math.random() * 0.6 + 0.4;
-    }
-
-    // visualizador circular (si existe analyzer)
-    if (analyser && dataArray) {
-        analyser.getByteFrequencyData(dataArray);
-        const cx = canvas.width / 2;
-        const cy = canvas.height / 2;
-        const radius = Math.min(canvas.width, canvas.height) * 0.12;
-        const bars = Math.min(dataArray.length, 120);
-
-        ctx.save();
-        ctx.translate(cx, cy);
-        for (let i = 0; i < bars; i++) {
-            const angle = (i / bars) * Math.PI * 2;
-            const v = dataArray[i] / 255;
-            const barH = v * 120;
-            const x = Math.cos(angle) * radius;
-            const y = Math.sin(angle) * radius;
-
-            const grad = ctx.createLinearGradient(0, 0, x, y);
-            grad.addColorStop(0, '#ff69b4');
-            grad.addColorStop(1, '#8a2be2');
-
-            ctx.strokeStyle = grad;
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-            ctx.lineTo(x * (1.2 + v * 0.8), y * (1.2 + v * 0.8));
-            ctx.stroke();
-        }
-        ctx.restore();
-    }
-
-    requestAnimationFrame(drawGalaxy);
+  requestAnimationFrame(draw);
 }
-drawGalaxy();
+draw();
 
-/* ==========================
-   💬 Chat (canal general)
-========================== */
-function appendChatMsg(text) {
-    const chat = document.getElementById('chatBox');
-    if (!chat) return;
-    const msgDiv = document.createElement('div');
-    msgDiv.className = 'user-message';
-    const avatar = localStorage.getItem('avatar') || '';
-    msgDiv.innerHTML = `
-        ${avatar ? `<img src="${avatar}" class="chatAvatar">` : ''}
-        <p>${text}</p>
-    `;
-    chat.appendChild(msgDiv);
-    chat.scrollTop = chat.scrollHeight;
+/* ============================
+   4) NAVEGACIÓN SECCIONES
+============================*/
+function showSection(sectionId) {
+  document.querySelectorAll('.section').forEach(sec => sec.classList.add('hidden'));
+  byId(sectionId)?.classList.remove('hidden');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.nav-btn[data-section="${sectionId}"]`)?.classList.add('active');
+  if (sectionId === 'chat') loadServers();
+  if (sectionId === 'foro') loadSubreddits();
+}
+
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => showSection(btn.dataset.section));
+});
+
+/* ============================
+   5) CHAT GENERAL (ESTILO DISCORD)
+============================*/
+function loadServers() {
+  const serverList = byId('serverList');
+  serverList.innerHTML = '<h3>Servidores</h3>';
+  servers.forEach((server, index) => {
+    const item = document.createElement('li');
+    item.className = `server-item ${server.active ? 'active' : ''}`;
+    item.textContent = server.name;
+    item.addEventListener('click', () => switchServer(index));
+    serverList.appendChild(item);
+  });
+  const addBtn = document.createElement('button');
+  addBtn.className = 'add-btn';
+  addBtn.textContent = '➕';
+  addBtn.addEventListener('click', () => {
+    const name = prompt('Nombre del servidor:');
+    if (name) {
+      servers.push({ name, channels: ['general'], active: false });
+      localStorage.setItem('gx_servers', JSON.stringify(servers));
+      loadServers();
+    }
+  });
+  serverList.appendChild(addBtn);
+  loadChannels();
+  loadFriends();
+}
+
+function switchServer(index) {
+  servers.forEach(s => s.active = false);
+  servers[index].active = true;
+  currentServer = index;
+  localStorage.setItem('gx_servers', JSON.stringify(servers));
+  loadServers();
+}
+
+function loadChannels() {
+  const channelList = byId('channelList');
+  channelList.innerHTML = '<h3>Canales</h3>';
+  servers[currentServer].channels.forEach(channel => {
+    const item = document.createElement('li');
+    item.className = `channel-item ${channel === currentChannel ? 'active' : ''}`;
+    item.textContent = `#${channel}`;
+    item.addEventListener('click', () => switchChannel(channel));
+    channelList.appendChild(item);
+  });
+}
+
+function switchChannel(channel) {
+  currentChannel = channel;
+  loadChannels();
+  // Cargar mensajes del canal (simulado)
+}
+
+function loadFriends() {
+  const friendsList = byId('friends');
+  friendsList.innerHTML = '';
+  friends.forEach(friend => {
+    const item = document.createElement('li');
+    item.className = 'friend-item';
+    item.textContent = friend;
+    friendsList.appendChild(item);
+  });
+  const addBtn = document.createElement('button');
+  addBtn.className = 'add-btn';
+  addBtn.textContent = '➕ Añadir Amigo';
+  addBtn.addEventListener('click', () => {
+    const name = prompt('Nombre del amigo:');
+    if (name) {
+      friends.push(name);
+      localStorage.setItem('gx_friends', JSON.stringify(friends));
+      loadFriends();
+    }
+  });
+  byId('channelList').appendChild(addBtn);
+}
+
+function appendChatMsg(text, isUser = true) {
+  const chat = byId('chatBox');
+  const name = localStorage.getItem('username') || 'Navegante';
+  const avatar = localStorage.getItem('avatar') || 'https://i.ibb.co/6y40F2r/default-avatar.png';
+  const d = document.createElement('div');
+  d.className = isUser ? 'user-message' : 'system-message';
+  d.innerHTML = isUser
+    ? `<div><p><b>${name}:</b> ${text}</p></div><img src="${avatar}" class="chatAvatar">`
+    : `<img src="assets/img/ai_avatar.jpg" class="chatAvatar"><div><p><b>Sistema:</b> ${text}</p></div>`;
+  chat.appendChild(d);
+  chat.scrollTop = chat.scrollHeight;
+  localStorage.setItem('chatHistory', chat.innerHTML);
 }
 
 function sendChat() {
-    const input = document.getElementById('chatInput');
-    if (!input) return;
-    const msg = input.value.trim();
-    if (!msg) return;
-    const user = localStorage.getItem('username') || 'Usuario';
-    appendChatMsg(`<b>${user}:</b> ${msg}`);
-    input.value = '';
-    saveChatHistory();
+  const input = byId('chatInput');
+  const msg = input?.value.trim();
+  if (!msg) return;
+  appendChatMsg(msg, true);
+  input.value = '';
 }
 
-/* botones chat */
-const clearChatBtn = document.getElementById('clearChatBtn');
-if (clearChatBtn) clearChatBtn.onclick = () => {
-    const chat = document.getElementById('chatBox');
-    if (chat) chat.innerHTML = '';
-    localStorage.removeItem('chatHistory');
-};
-const saveChatBtn = document.getElementById('saveChatBtn');
-if (saveChatBtn) saveChatBtn.onclick = saveChatHistory;
-const loadChatBtn = document.getElementById('loadChatBtn');
-if (loadChatBtn) loadChatBtn.onclick = loadChatHistory;
+byId('sendChatBtn')?.addEventListener('click', sendChat);
+byId('chatInput')?.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
+});
+byId('clearChatBtn')?.addEventListener('click', () => {
+  byId('chatBox').innerHTML = '';
+  localStorage.removeItem('chatHistory');
+});
 
-function saveChatHistory() {
-    const chat = document.getElementById('chatBox');
-    if (!chat) return;
-    localStorage.setItem('chatHistory', chat.innerHTML);
-}
-function loadChatHistory() {
-    const chat = document.getElementById('chatBox');
-    if (!chat) return;
-    const saved = localStorage.getItem('chatHistory');
-    if (saved) chat.innerHTML = saved;
-}
-loadChatHistory();
-
-/* ==========================
-   🎥 Videos: reproducir por enlace + agregar demo
-========================== */
-function getYouTubeID(url) {
-    try {
-        const u = new URL(url);
-        if (u.hostname.includes('youtu.be')) return u.pathname.slice(1);
-        if (u.searchParams.get('v')) return u.searchParams.get('v');
-        // soporta /embed/ y /v/
-        const parts = u.pathname.split('/');
-        return parts.pop();
-    } catch (e) {
-        return null;
-    }
-}
-
-function playYoutubeLink() {
-    const input = document.getElementById('youtubeLink');
-    if (!input) return alert('Campo no encontrado.');
-    const url = input.value.trim();
-    if (!url) return alert('Pega un enlace de YouTube.');
-    const id = getYouTubeID(url);
-    if (!id) return alert('No pude obtener el ID del enlace. Asegúrate de pegar un enlace de YouTube válido.');
-    playYoutubeById(id);
-}
-
-function playYoutubeById(id) {
-    const player = document.getElementById('videoPlayer');
-    if (!player) return;
-    player.innerHTML = '';
-    const iframe = document.createElement('iframe');
-    iframe.src = `https://www.youtube.com/embed/${id}`;
-    iframe.width = 560;
-    iframe.height = 315;
-    iframe.allowFullscreen = true;
-    player.appendChild(iframe);
-}
-
-// boton agregar demo
-const addVideoBtn = document.getElementById('addVideoBtn');
-if (addVideoBtn) {
-    addVideoBtn.onclick = () => {
-        const list = document.getElementById('videoList');
-        if (!list) return;
-        const id = prompt('Pega el ID de YouTube o enlace (demo):', 'dQw4w9WgXcQ') || 'dQw4w9WgXcQ';
-        const vid = getYouTubeID(id) || id;
-        const card = document.createElement('div');
-        card.className = 'videoItem';
-        card.innerHTML = `<p><strong>Demo — Nuevo video</strong></p>
-            <button onclick="playYoutubeById('${vid}')">Reproducir</button>
-            <button onclick="this.parentElement.remove()">✖ Eliminar</button>`;
-        list.prepend(card);
-    };
-}
-
-/* ==========================
-   🧵 Foro
-========================== */
-function postForo() {
-    const tituloEl = document.getElementById('foroTitulo');
-    const comentarioEl = document.getElementById('foroComentario');
-    if (!tituloEl || !comentarioEl) return;
-    const titulo = tituloEl.value.trim();
-    const comentario = comentarioEl.value.trim();
-    if (!titulo || !comentario) return alert('Completa todos los campos.');
-
-    const foroBox = document.getElementById('foroBox');
-    if (!foroBox) return;
-    const user = localStorage.getItem('username') || 'Usuario';
-    const avatar = localStorage.getItem('avatar') || '';
-
-    const post = document.createElement('div');
-    post.className = 'foroPost';
-    post.innerHTML = `
-        ${avatar ? `<img src="${avatar}" class="chatAvatar">` : ''}
-        <strong>${user}</strong>
-        <h4>${titulo}</h4>
-        <p>${comentario}</p>
-    `;
-    foroBox.prepend(post);
-    tituloEl.value = '';
-    comentarioEl.value = '';
-}
-
-/* ==========================
-   👤 Perfil
-========================== */
+/* ============================
+   6) PERFIL DE USUARIO
+============================*/
 function saveProfile() {
-    const usernameEl = document.getElementById('username');
-    const emailEl = document.getElementById('userEmail');
-    const fileEl = document.getElementById('userAvatarInput');
-    if (!usernameEl || !emailEl || !fileEl) return alert('Campos de perfil no encontrados.');
+  const username = byId('username')?.value.trim();
+  if (!username) return alert('Ingresa tu nombre de usuario');
+  const email = byId('userEmail')?.value.trim();
+  const file = byId('userAvatarInput')?.files?.[0];
 
-    const username = usernameEl.value.trim();
-    const email = emailEl.value.trim();
-    const file = fileEl.files[0];
+  localStorage.setItem('username', username);
+  if (email) localStorage.setItem('userEmail', email);
 
-    if (!username) return alert('Ingresa tu nombre.');
-    localStorage.setItem('username', username);
-    localStorage.setItem('userEmail', email || '');
+  const updatePreview = () => {
+    showProfilePreview();
+    alert('Perfil guardado con éxito.');
+  };
 
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = e => {
-            localStorage.setItem('avatar', e.target.result);
-            showProfilePreview();
-        };
-        reader.readAsDataURL(file);
-    } else {
-        showProfilePreview();
-    }
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      localStorage.setItem('avatar', e.target.result);
+      updatePreview();
+    };
+    reader.readAsDataURL(file);
+  } else updatePreview();
 }
+
 function showProfilePreview() {
-    const name = localStorage.getItem('username') || '';
-    const avatar = localStorage.getItem('avatar') || '';
-    const preview = document.getElementById('profilePreview');
-    if (!preview) return;
-    preview.innerHTML = avatar
-        ? `<img src="${avatar}" class="profileAvatar"><h3>${name}</h3>`
-        : `<h3>${name}</h3>`;
-    updateHeaderProfile();
+  const name = localStorage.getItem('username') || 'Navegante';
+  const avatar = localStorage.getItem('avatar') || 'https://i.ibb.co/6y40F2r/default-avatar.png';
+  byId('profilePreview').innerHTML = `<img src="${avatar}" class="profileAvatar"><h3>${name}</h3>`;
+  byId('profileUsernameDisplay').textContent = name;
+  if (byId('username')) byId('username').value = name;
+  if (byId('userEmail')) byId('userEmail').value = localStorage.getItem('userEmail') || '';
 }
-function updateHeaderProfile() {
-    const area = document.getElementById('accountStatusSidebar') || document.getElementById('accountStatus');
-    if (!area) return;
-    const name = localStorage.getItem('username');
-    const avatar = localStorage.getItem('avatar');
-    if (name) {
-        area.innerHTML = avatar
-            ? `<img src="${avatar}" class="miniAvatar"><span>${name}</span>`
-            : `<span>${name}</span>`;
-    } else area.innerHTML = '';
-}
-function clearProfile() {
-    if (!confirm('¿Borrar tu perfil local?')) return;
+
+byId('saveProfileBtn')?.addEventListener('click', saveProfile);
+byId('clearProfileBtn')?.addEventListener('click', () => {
+  if (confirm('¿Borrar perfil local?')) {
     localStorage.removeItem('username');
     localStorage.removeItem('avatar');
     localStorage.removeItem('userEmail');
-    const preview = document.getElementById('profilePreview');
-    if (preview) preview.innerHTML = '';
-    updateHeaderProfile();
-}
-const saveProfileBtn = document.getElementById('saveProfileBtn');
-if (saveProfileBtn) saveProfileBtn.onclick = saveProfile;
-const clearProfileBtn = document.getElementById('clearProfileBtn');
-if (clearProfileBtn) clearProfileBtn.onclick = clearProfile;
-showProfilePreview();
+    showProfilePreview();
+  }
+});
 
-/* ==========================
-   🤖 ASISTENTE IA (solo en su canal)
-========================== */
-let aiMemory = JSON.parse(localStorage.getItem('aiMemory') || '[]');
+/* ============================
+   7) FORO (ESTILO REDDIT)
+============================*/
+function loadSubreddits() {
+  const subredditsEl = byId('subreddits');
+  subredditsEl.innerHTML = '<h3>Subreddits</h3>';
+  subreddits.forEach((sub, index) => {
+    const item = document.createElement('li');
+    item.className = `subreddit-item ${sub.active ? 'active' : ''}`;
+    item.textContent = `r/${sub.name}`;
+    item.addEventListener('click', () => switchSubreddit(index));
+    subredditsEl.appendChild(item);
+  });
+  const addBtn = document.createElement('button');
+  addBtn.className = 'add-btn';
+  addBtn.textContent = '➕ Crear Subreddit';
+  addBtn.addEventListener('click', () => {
+    const name = prompt('Nombre del subreddit:');
+    if (name) {
+      subreddits.push({ name, posts: [], active: false });
+      localStorage.setItem('gx_subreddits', JSON.stringify(subreddits));
+      loadSubreddits();
+    }
+  });
+  subredditsEl.appendChild(addBtn);
+  loadPosts();
+}
+
+function switchSubreddit(index) {
+  subreddits.forEach(s => s.active = false);
+  subreddits[index].active = true;
+  currentSubreddit = subreddits[index].name;
+  localStorage.setItem('gx_subreddits', JSON.stringify(subreddits));
+  loadSubreddits();
+}
+
+function loadPosts() {
+  const foroBox = byId('foroBox');
+  foroBox.innerHTML = '';
+  subreddits.find(s => s.name === currentSubreddit).posts.forEach(post => {
+    const postEl = document.createElement('div');
+    postEl.className = 'foro-post';
+    postEl.innerHTML = `
+      <div class="upvotes">
+        <button class="upvote-btn">⬆️</button>
+        <span>${post.upvotes}</span>
+        <button class="downvote-btn">⬇️</button>
+      </div>
+      <div>
+        <h4>${post.title}</h4>
+        <p>${post.content}</p>
+        <small>Por ${post.author} - ${post.comments.length} comentarios</small>
+        <div class="comments">
+          ${post.comments.map(comment => `<div class="comment"><strong>${comment.author}:</strong> ${comment.text}</div>`).join('')}
+        </div>
+      </div>
+    `;
+    postEl.querySelector('.upvote-btn').addEventListener('click', () => {
+      post.upvotes++;
+      localStorage.setItem('gx_subreddits', JSON.stringify(subreddits));
+      loadPosts();
+    });
+    postEl.querySelector('.downvote-btn').addEventListener('click', () => {
+      post.upvotes = Math.max(0, post.upvotes - 1);
+      localStorage.setItem('gx_subreddits', JSON.stringify(subreddits));
+      loadPosts();
+    });
+    foroBox.appendChild(postEl);
+  });
+}
+
+byId('postForoBtn')?.addEventListener('click', postForo);
+function postForo() {
+  const title = byId('foroTitulo')?.value.trim();
+  const comment = byId('foroComentario')?.value.trim();
+  if (!title || !comment) return alert('Completa título y comentario');
+  const user = localStorage.getItem('username') || 'Navegante';
+  const subreddit = subreddits.find(s => s.name === currentSubreddit);
+  subreddit.posts.unshift({
+    title,
+    content: comment,
+    author: user,
+    upvotes: 0,
+    comments: []
+  });
+  localStorage.setItem('gx_subreddits', JSON.stringify(subreddits));
+  loadPosts();
+  byId('foroTitulo').value = '';
+  byId('foroComentario').value = '';
+}
+
+/* ============================
+   8) ASISTENTE IA (MEJORADO: LUNA, RESPUESTAS COHERENTES)
+============================*/
+function appendAIMsg(container, who, text) {
+  const div = document.createElement('div');
+  div.className = who === 'ai' ? 'ai-message' : 'user-message';
+  const iaAvatar = window.IA_AVATAR;
+  const iaName = window.IA_NAME;
+  const userAvatar = localStorage.getItem('avatar') || 'https://i.ibb.co/6y40F2r/default-avatar.png';
+  const userName = localStorage.getItem('username') || 'Tú';
+  div.innerHTML = who === 'ai'
+    ? `<img src="${iaAvatar}" class="chatAvatar"><div><p><b>${iaName}:</b> ${text}</p></div>`
+    : `<div><p><b>${userName}:</b> ${text}</p></div><img src="${userAvatar}" class="chatAvatar">`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
 
 function talkToAssistant() {
-    const input = document.getElementById('assistantInput');
-    if (!input) return;
-    const msg = input.value.trim();
-    if (!msg) return;
-    const chat = document.getElementById('assistantChat');
-    if (!chat) return;
+  const input = byId('assistantInput');
+  const msg = input?.value.trim().toLowerCase();
+  if (!msg) return;
+  const chat = byId('assistantChat');
+  appendAIMsg(chat, 'user', input.value);
+  input.value = '';
 
-    appendAIMsg(chat, 'user', msg);
-    const reply = aiThink(msg);
-    appendAIMsg(chat, 'ai', reply);
+  // Respuestas coherentes y sociales de Luna (IA chica)
+  let response = '¡Hola! Soy Luna, tu copiloto cósmico. ¿En qué puedo ayudarte hoy?';
+  if (msg.includes('hola') || msg.includes('hi')) response = '¡Hola! 😊 Me alegra verte en Galaxy X. ¿Qué tal tu día en el espacio?';
+  else if (msg.includes('ayuda') || msg.includes('help')) response = 'Claro, estoy aquí para ayudarte. ¿Necesitas info sobre el foro, música o algo más?';
+  else if (msg.includes('musica') || msg.includes('música')) response = '¡Me encanta la música! Prueba "Mirror Temple" o "Ender" en la sección Música. ¿Quieres que te cuente sobre ellas?';
+  else if (msg.includes('foro') || msg.includes('reddit')) response = 'El foro es como Reddit, pero galáctico. Crea posts, vota y comenta. ¡Únete a r/general!';
+  else if (msg.includes('chat') || msg.includes('discord')) response = 'El chat es estilo Discord: servidores, canales y amigos. ¡Crea uno y conecta!';
+  else if (msg.includes('perfil')) response = 'Tu perfil es personalizable. Sube un avatar y guarda tu info. ¿Quieres consejos?';
+  else if (msg.includes('gracias') || msg.includes('thanks')) response = '¡De nada! 😘 Siempre estoy aquí para charlar.';
+  else if (msg.includes('adios') || msg.includes('bye')) response = '¡Hasta luego! 🌌 Vuelve pronto al Hub Galáctico.';
+  else response = '¡Qué interesante! Cuéntame más sobre eso. ¿O prefieres que te recomiende algo de Galaxy X?';
 
-    aiMemory.push({ q: msg, a: reply, t: Date.now() });
-    localStorage.setItem('aiMemory', JSON.stringify(aiMemory));
-    input.value = '';
-    chat.scrollTop = chat.scrollHeight;
+  setTimeout(() => appendAIMsg(chat, 'ai', response), 500);
+  window.aiMemory.push({ q: input.value, a: response });
 }
 
-function appendAIMsg(chat, who, text) {
-    const div = document.createElement('div');
-    div.className = who === 'ai' ? 'ai-message' : 'user-message';
-    const avatar = who === 'ai'
-        ? (document.getElementById('assistantAvatar') ? document.getElementById('assistantAvatar').src : '')
-        : localStorage.getItem('avatar') || '';
-    div.innerHTML = `${avatar ? `<img src="${avatar}" class="chatAvatar">` : ''}<p>${text}</p>`;
-    chat.appendChild(div);
-}
-
-function aiThink(msg) {
-    const m = msg.toLowerCase();
-    const user = localStorage.getItem('username') || 'amigo';
-
-    // comandos directos
-    if (m.includes('hola')) return `¡Hola ${user}! 🌠 ¿En qué puedo ayudarte hoy?`;
-    if (m.includes('quién eres') || m.includes('quien eres')) return 'Soy Galaxy IA, tu asistente cósmico 🚀. Puedo recordar temas, abrir secciones y ayudarte a encontrar videos.';
-    if (m.includes('nombre')) return `Tu nombre registrado es ${user}.`;
-    if (m.includes('video')) { showSection('videos'); return 'Te llevé a Videos. Pega un enlace o busca uno.'; }
-    if (m.includes('foro')) { showSection('foro'); return 'Abriendo Foro...'; }
-    if (m.includes('gracias')) return '¡De nada! Siempre a tu servicio ✨';
-    if (m.includes('adiós') || m.includes('chao')) return 'Hasta pronto 👋';
-
-    // "ir a" comandos
-    if (m.includes('ir a')) {
-        if (m.includes('chat')) { showSection('chat'); return 'Llevándote al Chat.'; }
-        if (m.includes('videos')) { showSection('videos'); return 'Llevándote a Videos.'; }
-        if (m.includes('foro')) { showSection('foro'); return 'Llevándote al Foro.'; }
-        if (m.includes('perfil')) { showSection('perfil'); return 'Llevándote a Perfil.'; }
-    }
-
-    // recordar/guardar (simple)
-    if (m.startsWith('recuérdame') || m.startsWith('recordar')) {
-        aiMemory.push({ q: msg, a: 'Recordatorio guardado', t: Date.now() });
-        localStorage.setItem('aiMemory', JSON.stringify(aiMemory));
-        return 'He guardado ese recordatorio en mi memoria local.';
-    }
-
-    // respuestas variadas y no repetitivas
-    const replies = [
-        'Interesante... cuéntame más.',
-        'Hmm... eso me hace pensar 🤔',
-        'Eso suena genial 🌌',
-        'Cuéntame algo más de eso 💭',
-        'Buena idea, ¿quieres que lo recuerde?',
-        'Anotado en mi memoria cósmica ✨'
-    ];
-    // intento de evitar repetición consultando memoria
-    const lastSimilar = aiMemory.slice().reverse().find(r => r.q && r.q.toLowerCase().includes(msg.toLowerCase().split(' ')[0]));
-    if (lastSimilar) return `Ya hablamos antes de algo parecido: "${lastSimilar.q}". ¿Quieres continuar?`;
-    return replies[Math.floor(Math.random() * replies.length)];
-}
-
-const clearAIBtn = document.getElementById('clearAIBtn');
-if (clearAIBtn) clearAIBtn.onclick = () => {
-    if (!confirm('¿Borrar memoria de la IA?')) return;
-    aiMemory = [];
-    localStorage.removeItem('aiMemory');
-    const chat = document.getElementById('assistantChat');
-    if (chat) chat.innerHTML = '';
-};
-
-/* ==========================
-   🎵 Música de fondo (integrada + visualizador)
-========================== */
-const songs = [
-    { title: 'Canción 1', src: 'audio/cancion1.mp3' },
-    { title: 'Canción 2', src: 'audio/cancion2.mp3' }
-];
-
-let current = 0;
-const audio = new Audio(songs[current].src);
-audio.crossOrigin = "anonymous"; // para audioCtx
-let isPlaying = false;
-
-const playPause = document.getElementById('playPause');
-const nextSong = document.getElementById('nextSong');
-const prevSong = document.getElementById('prevSong');
-const volumeControl = document.getElementById('volumeControl');
-const titleEl = document.getElementById('songTitle');
-
-const progressBar = document.createElement('input');
-progressBar.type = 'range';
-progressBar.min = 0;
-progressBar.max = 100;
-progressBar.value = 0;
-progressBar.id = 'progressBar';
-const musicPlayer = document.getElementById('musicPlayer');
-if (musicPlayer) musicPlayer.appendChild(progressBar);
-
-const timeDisplay = document.createElement('span');
-timeDisplay.style.marginLeft = '10px';
-if (musicPlayer) musicPlayer.appendChild(timeDisplay);
-
-function setupVisualizer() {
-    if (!audioCtx && audio) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const src = audioCtx.createMediaElementSource(audio);
-        analyser = audioCtx.createAnalyser();
-        analyser.fftSize = 256;
-        bufferLength = analyser.frequencyBinCount;
-        dataArray = new Uint8Array(bufferLength);
-        src.connect(analyser);
-        analyser.connect(audioCtx.destination);
-    }
-}
-
-function playPauseMusic() {
-    setupVisualizer();
-    if (!isPlaying) {
-        audio.play().catch(()=>{ /* autoplay puede bloquearse; el usuario debe interactuar */ });
-        playPause && (playPause.textContent = '⏸️');
-        isPlaying = true;
-    } else {
-        audio.pause();
-        playPause && (playPause.textContent = '▶️');
-        isPlaying = false;
-    }
-}
-function changeSong(i) {
-    current = (i + songs.length) % songs.length;
-    audio.src = songs[current].src;
-    titleEl && (titleEl.textContent = `Reproduciendo: ${songs[current].title}`);
-    audio.play().catch(()=>{});
-    playPause && (playPause.textContent = '⏸️');
-    isPlaying = true;
-}
-
-if (playPause) playPause.onclick = playPauseMusic;
-if (nextSong) nextSong.onclick = () => changeSong(current + 1);
-if (prevSong) prevSong.onclick = () => changeSong(current - 1);
-if (volumeControl) volumeControl.oninput = () => (audio.volume = volumeControl.value);
-
-audio.addEventListener('timeupdate', () => {
-    if (audio.duration) {
-        const p = (audio.currentTime / audio.duration) * 100;
-        progressBar.value = p;
-        timeDisplay.textContent = `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
-    }
-});
-progressBar.addEventListener('input', () => {
-    if (!audio.duration) return;
-    audio.currentTime = (progressBar.value / 100) * audio.duration;
+byId('sendAIBtn')?.addEventListener('click', talkToAssistant);
+byId('clearAIBtn')?.addEventListener('click', () => {
+  byId('assistantChat').innerHTML = '';
+  window.aiMemory = [];
 });
 
-function formatTime(sec) {
-    const m = Math.floor(sec / 60);
-    const s = Math.floor(sec % 60).toString().padStart(2, '0');
-    return `${m}:${s}`;
+/* ============================
+   9) VIDEOS / YOUTUBE (CON BÚSQUEDA)
+============================*/
+byId('searchYoutubeBtn')?.addEventListener('click', searchYoutube);
+function searchYoutube() {
+  const query = byId('youtubeSearch')?.value.trim();
+  if (!query) return alert('Ingresa un término de búsqueda.');
+  // Simulación de búsqueda (en producción, usa YouTube API)
+  const results = [
+    { title: 'Video de Galaxy X', id: 'dQw4w9WgXcQ' },
+    { title: 'Tutorial Espacial', id: 'dQw4w9WgXcQ' }
+  ].filter(r => r.title.toLowerCase().includes(query.toLowerCase()));
+  const resultsEl = byId('searchResults');
+  resultsEl.innerHTML = '';
+  results.forEach(result => {
+    const item = document.createElement('div');
+    item.className = 'result-item';
+    item.textContent = result.title;
+    item.addEventListener('click', () => playYoutube(result.id));
+    resultsEl.appendChild(item);
+  });
 }
-titleEl && (titleEl.textContent = `Reproduciendo: ${songs[current].title}`);
 
-/* ==========================
-   🎵 Botón lateral: activar/pausar música de fondo
-========================== */
-function toggleBackgroundMusic() {
-    // si no hay elemento de música, simplemente alterna play/pause
-    playPauseMusic();
+byId('playYoutubeBtn')?.addEventListener('click', () => {
+  const link = byId('youtubeLink')?.value.trim();
+  if (!link) return alert('Pega un enlace de YouTube.');
+  let videoId = '';
+  if (link.includes('youtu.be/')) videoId = link.split('youtu.be/')[1].split(/[?&]/)[0];
+  else if (link.includes('v=')) videoId = link.split('v=')[1].split(/[&]/)[0];
+  else videoId = link;
+  if (!videoId) return alert('ID no válido.');
+  playYoutube(videoId);
+});
+
+function playYoutube(id) {
+  const player = byId('videoPlayer');
+  player.innerHTML = `<iframe width="100%" height="315" src="https://www.youtube.com/embed/${id}?autoplay=1" frameborder="0" allowfullscreen></iframe>`;
 }
 
-/* ==========================
-   🔄 Integración visualizador con drawGalaxy
-   (actualiza analyzer cada frame si existe)
-========================== */
-(function visualizerLoop() {
-    // si hay analyzer y canvas, se alimenta drawGalaxy (ya usa analyzer)
-    if (!analyser && audio && (audioCtx === undefined || audioCtx === null)) {
-        // no hacer nada, setupVisualizer se llama cuando usuario interactúe
-    }
-    requestAnimationFrame(visualizerLoop);
-})();
+/* ============================
+   10) MÚSICA AVANZADA (CON BÚSQUEDA)
+============================*/
+byId('searchMusicBtn')?.addEventListener('click', searchMusic);
+function searchMusic() {
+  const query = byId('musicSearch')?.value.trim();
+  if (!query) return alert('Ingresa un término de búsqueda.');
+  // Simulación de búsqueda
+  const results = [
+    { title: 'Canción Espacial', src: 'assets/audio/Mirror_Temple.mp3' },
+    { title: 'Ritmo Cósmico', src: 'assets/audio/Ender.mp3' }
+  ].filter(r => r.title.toLowerCase().includes(query.toLowerCase()));
+  const resultsEl = byId('musicSearchResults');
+  resultsEl.innerHTML = '';
+  results.forEach(result => {
+    const item = document.createElement('button');
+    item.className = 'song-btn';
+    item.textContent = `🎵 ${result.title}`;
+    item.addEventListener('click', () => playCustomSong(result.src, result.title));
+    resultsEl.appendChild(item);
+  });
+}
 
-/* ==========================
-   🧾 Inicializaciones finales
-========================== */
-// Asegurar que elementos opcionales no rompan
+byId('playMusicBtn')?.addEventListener('click', () => {
+  const link = byId('musicLink')?.value.trim();
+  if (!link) return alert('Pega un enlace de música.');
+  // Simulación: en producción, maneja enlaces externos
+  playCustomSong(link, 'Canción Personalizada');
+});
+
+function playCustomSong(src, title) {
+  music.src = src;
+  if (songTitle) songTitle.textContent = `🎵 ${title}`;
+  if (currentSongTitle) currentSongTitle.textContent = title;
+  music.play().catch(() => {});
+  isPlaying = true;
+  toggleMusicBtn.textContent = '⏸️';
+  miniPlayPause.textContent = '⏸️';
+  startVisualizer();
+}
+
+// Botones de canciones de GalaxyX
+document.querySelectorAll('.galaxy-song').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const src = btn.dataset.src;
+    const title = btn.dataset.title;
+    playCustomSong(src, title);
+  });
+});
+
+/* ============================
+   11) INICIALIZACIÓN
+============================*/
 document.addEventListener('DOMContentLoaded', () => {
-    // show profile if stored
-    showProfilePreview();
-    // If a saved chat exists load it
-    loadChatHistory();
-    // Set initial volume
-    try { audio.volume = (volumeControl ? volumeControl.value : 0.5); } catch (e) {}
-    // Attach youtube play from input if exists
-    const ytInput = document.getElementById('youtubeLink');
-    if (ytInput) ytInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') playYoutubeLink();
-    });
-});
+  toggleMusicBtn.dataset.state = 'paused';
+  changeSong();
+  showSection('chat');
 
-console.log('✅ Galaxy X — script.js cargado y listo (música, videos, chat, IA).');
+  // Historial chat
+  const chatHistory = localStorage.getItem('chatHistory');
+  if (chatHistory) byId('chatBox').innerHTML = chatHistory;
+  else appendChatMsg('¡Bienvenido al Chat General!', 'system');
+
+  // Perfil
+  showProfilePreview();
+
+  // Memoria IA
+  if (window.aiMemory.length > 0) {
+    const chat = byId('assistantChat');
+    window.aiMemory.forEach(m => {
+      appendAIMsg(chat, 'user', m.q);
+      appendAIMsg(chat, 'ai', m.a);
+    });
+  }
+
+  // Tema guardado
+  const savedTheme = localStorage.getItem('gx_theme') || 'galaxy';
+  document.body.setAttribute('data-theme', savedTheme);
+  if (themeSelect) themeSelect.value = savedTheme;
+  if (savedTheme === 'custom') customColorInput.style.display = 'block';
+  else customColorInput.style.display = 'none';
+
+  // Volumen inicial
+  miniVolume.value = music.volume;
+});
