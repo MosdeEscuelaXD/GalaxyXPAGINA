@@ -16,7 +16,7 @@
     <!-- SIDEBAR -->
     <aside id="sidebar" role="navigation" aria-label="Navegación principal del Hub Galáctico">
         <header>
-            <h1 class="glow-title">Galaxy X 4.2</h1>
+            <h1 class="glow-title">Galaxy X 5.0</h1>
         </header>
 
         <!-- Selector de tema -->
@@ -30,6 +30,8 @@
                 <option value="custom">🌈 Color Personalizado</option>
             </select>
             <input type="color" id="customColorInput" style="display: none;">
+            <button id="darkModeToggle" class="secondary-btn">🌙 Modo Oscuro Estelar</button>
+            <button id="surpriseBtn" class="secondary-btn">🎉 Sorpresa</button>
         </div>
 
         <!-- Navegación principal -->
@@ -40,6 +42,8 @@
                 <li><button class="nav-btn" data-section="foro">📜 Foro</button></li>
                 <li><button class="nav-btn" data-section="assistant">🤖 Asistente IA</button></li>
                 <li><button class="nav-btn" data-section="musicAdvanced">🎵 Música</button></li>
+                <li><button class="nav-btn" data-section="explorer">🚀 Explorador</button></li>
+                <li><button class="nav-btn" data-section="trivia">🧠 Trivia Galáctica</button></li>
                 <li><button class="nav-btn" data-section="perfil">👤 Perfil</button></li>
                 <li><button class="nav-btn" data-section="info">ℹ️ Info</button></li>
             </ul>
@@ -48,44 +52,41 @@
         <!-- Estado del perfil -->
         <div id="accountStatusSidebar" class="status-indicator">
             <span id="profileUsernameDisplay">Cargando Perfil...</span>
+            <div id="notifications" class="notifications">🔔 0</div>
         </div>
     </aside>
 
     <!-- CONTENIDO PRINCIPAL -->
     <main id="mainContent" role="main" aria-live="polite">
 
-        <!-- CHAT GENERAL (ESTILO DISCORD) -->
+        <!-- CHAT GENERAL -->
         <section id="chat" class="section">
             <h2 class="section-title glow">💬 Chat General</h2>
             <div class="chat-layout">
-                <!-- Lista de servidores -->
                 <div id="serverList" class="server-list card">
                     <h3>Servidores</h3>
                     <ul id="servers">
                         <li class="server-item active" data-server="general">🌌 General</li>
-                        <!-- Más servidores se agregarán dinámicamente -->
                     </ul>
                     <button id="addServerBtn" class="add-btn">➕</button>
                 </div>
-                <!-- Lista de canales y amigos -->
                 <div id="channelList" class="channel-list card">
                     <h3>Canales</h3>
                     <ul id="channels">
                         <li class="channel-item active" data-channel="general">#general</li>
-                        <!-- Más canales se agregarán dinámicamente -->
                     </ul>
                     <h3>Amigos</h3>
                     <ul id="friends">
-                        <li class="friend-item">👤 Usuario1 (En línea)</li>
-                        <!-- Más amigos se agregarán dinámicamente -->
+                        <li class="friend-item" data-status="online">👤 Usuario1 (En línea)</li>
                     </ul>
                     <button id="addFriendBtn" class="add-btn">➕ Añadir Amigo</button>
+                    <button id="privateChatBtn" class="secondary-btn">💬 Chat Privado</button>
                 </div>
-                <!-- Chat principal -->
                 <div class="chat-main">
                     <div id="chatBox" class="card large chat-messages-container" role="log"></div>
                     <div class="chat-input-area">
-                        <input type="text" id="chatInput" placeholder="Escribe tu mensaje y presiona Enter..." class="input-full">
+                        <input type="text" id="chatInput" placeholder="Escribe tu mensaje..." class="input-full">
+                        <button id="emojiBtn" class="secondary-btn">😀 Emojis</button>
                         <button id="sendChatBtn" class="primary-btn">Enviar</button>
                         <button id="voiceChatBtn" class="secondary-btn">🎤 Voz</button>
                     </div>
@@ -98,7 +99,7 @@
             <h2 class="section-title glow">🤖 Asistente IA</h2>
             <div class="ai-wrap card">
                 <div class="ai-top">
-                    <img id="assistantAvatar" src="assets/img/ai_avatar.jpg" alt="Avatar IA" class="ai-avatar floating-circle">
+                    <img id="assistantAvatar" src="https://i.pinimg.com/736x/04/af/75/04af75cbe0cf41a79ee459d3f74d3998.jpg" alt="Avatar IA" class="ai-avatar floating-circle">
                     <div class="ai-info-text">
                         <h3>Luna</h3>
                         <p class="muted">Tu copiloto cósmico, lista para charlar y ayudar.</p>
@@ -109,6 +110,7 @@
                     <input type="text" id="assistantInput" placeholder="Habla con Luna..." class="input-full">
                     <button id="sendAIBtn" class="primary-btn">Enviar</button>
                     <button id="clearAIBtn" class="secondary-btn">🧠 Borrar Memoria</button>
+                    <button id="nameGeneratorBtn" class="secondary-btn">🚀 Generar Nombre Espacial</button>
                 </div>
             </div>
         </section>
@@ -117,38 +119,41 @@
         <section id="videos" class="section hidden">
             <h2 class="section-title glow">🎥 Proyector Galáctico</h2>
             <div class="card video-search-bar">
-                <input type="text" id="youtubeSearch" placeholder="Buscar video por nombre..." class="input-full">
+                <input type="text" id="youtubeSearch" placeholder="Buscar video..." class="input-full">
+                <select id="videoCategory">
+                    <option value="">Todas las categorías</option>
+                    <option value="music">Música</option>
+                    <option value="science">Ciencia</option>
+                </select>
                 <button id="searchYoutubeBtn" class="primary-btn">Buscar</button>
             </div>
             <div class="card video-input-bar">
-                <input type="text" id="youtubeLink" placeholder="O pega el enlace de YouTube aquí..." class="input-full">
+                <input type="text" id="youtubeLink" placeholder="O pega enlace..." class="input-full">
                 <button id="playYoutubeBtn" class="primary-btn">Reproducir</button>
             </div>
-            <div id="videoPlayer" class="card video-player-container">
-                <p>Selecciona un video para reproducir.</p>
-            </div>
+            <div id="videoPlayer" class="card video-player-container"></div>
             <div id="searchResults" class="card search-results"></div>
+            <div id="favoritesVideos" class="card">Favoritos: <ul id="favVideosList"></ul></div>
         </section>
 
-        <!-- FORO (ESTILO REDDIT) -->
+        <!-- FORO -->
         <section id="foro" class="section hidden">
             <h2 class="section-title glow">📜 Foro Cósmico</h2>
             <div class="foro-layout">
-                <!-- Subreddits -->
                 <div id="subreddits" class="subreddits card">
                     <h3>Subreddits</h3>
                     <ul>
                         <li class="subreddit-item active" data-sub="general">r/general</li>
-                        <!-- Más subreddits dinámicos -->
+                        <li class="subreddit-item" data-sub="music">r/music</li>
+                        <li class="subreddit-item" data-sub="science">r/science</li>
                     </ul>
                     <button id="createSubredditBtn" class="add-btn">➕ Crear Subreddit</button>
                 </div>
-                <!-- Posts -->
                 <div class="foro-main">
                     <div class="card foro-post-creator">
-                        <input type="text" id="foroTitulo" placeholder="Título del Post" class="input-full">
-                        <textarea id="foroComentario" placeholder="Tu mensaje..." class="input-full" rows="4"></textarea>
-                        <button id="postForoBtn" class="primary-btn">Publicar Post</button>
+                        <input type="text" id="foroTitulo" placeholder="Título..." class="input-full">
+                        <textarea id="foroComentario" placeholder="Mensaje..." class="input-full" rows="4"></textarea>
+                        <button id="postForoBtn" class="primary-btn">Publicar</button>
                     </div>
                     <div id="foroBox" class="card large foro-posts"></div>
                 </div>
@@ -159,11 +164,11 @@
         <section id="musicAdvanced" class="section hidden">
             <h2 class="section-title glow">🎧 Central Galáctica de Sonido</h2>
             <div class="card music-search-bar">
-                <input type="text" id="musicSearch" placeholder="Buscar canción por nombre..." class="input-full">
+                <input type="text" id="musicSearch" placeholder="Buscar canción..." class="input-full">
                 <button id="searchMusicBtn" class="primary-btn">Buscar</button>
             </div>
             <div class="card music-input-bar">
-                <input type="text" id="musicLink" placeholder="O pega el enlace de la canción..." class="input-full">
+                <input type="text" id="musicLink" placeholder="O pega enlace..." class="input-full">
                 <button id="playMusicBtn" class="primary-btn">Reproducir</button>
             </div>
             <div class="card new-music-player">
@@ -171,18 +176,17 @@
                     <img id="albumArt" src="assets/img/galaxy_music.jpg" alt="Carátula" class="album-art">
                     <div class="song-info">
                         <h3 id="songTitle">Ninguna canción</h3>
-                        <p id="songArtist">Selecciona una canción para comenzar</p>
+                        <p id="songArtist">Selecciona...</p>
                     </div>
                 </div>
                 <div class="music-controls">
                     <button id="prevTrack">⏮️</button>
-                    <button id="playPause" data-state="paused">▶️</button>
+                    <button id="playPause">▶️</button>
                     <button id="nextTrack">⏭️</button>
                 </div>
                 <input type="range" id="trackProgress" min="0" max="100" value="0">
                 <div class="time-display">
-                    <span id="currentTime">0:00</span>
-                    <span id="totalTime">0:00</span>
+                    <span id="currentTime">0:00</span> / <span id="totalTime">0:00</span>
                 </div>
                 <div class="volume-control">
                     <label for="volumeSlider">🔊 Volumen</label>
@@ -195,60 +199,73 @@
                     <button class="song-btn galaxy-song" data-src="assets/audio/Ender.mp3" data-title="Ender" data-artist="Mythic Beats">🎵 Ender</button>
                 </div>
                 <div id="musicSearchResults" class="search-results"></div>
+                <div id="playlists" class="card">Listas: <ul id="playlistList"></ul><button id="createPlaylistBtn" class="secondary-btn">Crear Lista</button></div>
+            </div>
+        </section>
+
+                <!-- EXPLORADOR -->
+        <section id="explorer" class="section hidden">
+            <h2 class="section-title glow">🚀 Explorador Estelar</h2>
+            <div class="card explorer-game">
+                <p>¡Navega y captura estrellas!</p>
+                <canvas id="explorerCanvas" width="600" height="400"></canvas>
+                <button id="startExplorerBtn" class="primary-btn">Iniciar</button>
+                <p id="explorerScore">Puntuación: 0</p>
+            </div>
+        </section>
+
+        <!-- TRIVIA GALÁCTICA -->
+        <section id="trivia" class="section hidden">
+            <h2 class="section-title glow">🧠 Trivia Galáctica</h2>
+            <div class="card trivia-game">
+                <p id="triviaQuestion">Pregunta aquí</p>
+                <div id="triviaOptions"></div>
+                <button id="nextTriviaBtn" class="primary-btn">Siguiente</button>
+                <p id="triviaScore">Puntuación: 0</p>
             </div>
         </section>
 
         <!-- PERFIL -->
         <section id="perfil" class="section hidden">
-            <h2 class="section-title glow">👤 Configuración de Perfil</h2>
+            <h2 class="section-title glow">👤 Perfil</h2>
             <div class="card profile-config-card">
                 <label for="username">Nombre:</label>
                 <input type="text" id="username" placeholder="Nombre de usuario" class="input-full">
                 <label for="userEmail">Correo electrónico:</label>
                 <input type="email" id="userEmail" placeholder="tu@correo.com" class="input-full">
-                <label for="userAvatarInput">Subir avatar:</label>
-                <input type="file" id="userAvatarInput" accept="image/png, image/jpeg">
+                <label for="userAvatarInput">Avatar:</label>
+                <input type="file" id="userAvatarInput" accept="image/*">
                 <div class="profile-actions">
-                    <button id="saveProfileBtn" class="primary-btn">Guardar Perfil</button>
-                    <button id="clearProfileBtn" class="danger-btn">Borrar Perfil</button>
+                    <button id="saveProfileBtn" class="primary-btn">Guardar</button>
+                    <button id="clearProfileBtn" class="danger-btn">Borrar</button>
                 </div>
                 <div id="profilePreview" class="profile-preview"></div>
+                <div id="activityHistory" class="card">Historial: <ul id="historyList"></ul></div>
+                <div id="badges" class="card">Badges: <span id="badgeList"></span></div>
             </div>
         </section>
 
         <!-- INFO -->
         <section id="info" class="section hidden">
-            <h2 class="section-title glow">ℹ️ Información</h2>
+            <h2 class="section-title glow">ℹ️ Info</h2>
             <div class="card info-card">
-                <h3>¿Qué es Galaxy X?</h3>
-                <p>Galaxy X es una aplicación web tipo hub galáctico que combina funcionalidades de plataformas populares como Discord, TikTok, YouTube y Reddit en una sola interfaz interactiva y personalizable. Su enfoque es social, multimedia y gamificado, con un estilo moderno, dinámico y espacial.</p>
-                <p><strong>Objetivos principales:</strong></p>
-                <ul>
-                    <li>Chat general y privado con un asistente IA.</li>
-                    <li>Reproducción de música y videos de YouTube con controles avanzados y efectos visuales.</li>
-                    <li>Publicación y consulta de contenido tipo foro o microblog.</li>
-                    <li>Gestión de perfil de usuario con avatar y datos personales.</li>
-                    <li>Personalización de temas de colores y fondos galácticos interactivos.</li>
-                    <li>Interfaz responsive y accesible desde cualquier dispositivo.</li>
-                </ul>
-                <p>¡Explora el universo de Galaxy X y conecta con otros usuarios en este espacio cósmico!</p>
-                <h4>Video de Introducción</h4>
+                <p>Galaxy X: Hub galáctico con chat, foro, música y más.</p>
                 <iframe src="https://drive.google.com/file/d/1w_DdAjCHnycZyHeLRUqRy9G75sb7PZSb/preview" width="100%" height="315" allowfullscreen></iframe>
-                <p>Si no se carga, <a href="https://drive.google.com/file/d/1w_DdAjCHnycZyHeLRUqRy9G75sb7PZSb/view" target="_blank">haz clic aquí para verlo</a>.</p>
             </div>
         </section>
 
     </main>
 
-    <!-- REPRODUCTOR FLOTANTE DE MÚSICA -->
+    <!-- REPRODUCTOR FLOTANTE -->
     <div class="music-player">
         <button id="miniPrev">⏮️</button>
-        <button id="miniPlayPause" data-state="paused">▶️</button>
+        <button id="miniPlayPause">▶️</button>
         <button id="miniNext">⏭️</button>
-        <span id="currentSongTitle">Ninguna canción</span>
+        <span id="currentSongTitle">Ninguna</span>
         <input type="range" id="miniVolume" min="0" max="1" step="0.01" value="0.5">
     </div>
 
     <script src="script.js"></script>
+    <script src="assets/icons/ai/assistant.js"></script>
 </body>
 </html>

@@ -1,9 +1,8 @@
 /* =========================================
-   🌠 GALAXY X | STYLES COMPLETO MEJORADO (V9.0)
-   - Interfaz ultra-moderna con efectos galácticos avanzados
-   - Animaciones suaves, glow dinámico y responsive total
-   - Efectos especiales: estrellas parpadeantes intensas con música
-   - Preparado para chat Discord-like, foro Reddit, búsquedas y IA flotante
+   🌠 GALAXY X | STYLES COMPLETO MEJORADO (V9.2)
+   - Sidebar fijo y contenido a la derecha
+   - Mantiene todo tu diseño original
+   - Footer, reproductor global y responsive optimizados
 ========================================= */
 
 /* -----------------------------------------
@@ -38,7 +37,6 @@ body[data-theme="lava"] {
     --color-sidebar-bg: #2b0b0b;
     --color-card-bg: #3a1212;
 }
-
 body[data-theme="ocean"] {
     --color-primary: #1abc9c;
     --color-secondary: #3498db;
@@ -48,7 +46,6 @@ body[data-theme="ocean"] {
     --color-sidebar-bg: #0d2b3f;
     --color-card-bg: #153a50;
 }
-
 body[data-theme="neon"] {
     --color-primary: #00ff7f;
     --color-secondary: #39ff14;
@@ -58,9 +55,8 @@ body[data-theme="neon"] {
     --color-sidebar-bg: #0d0d0d;
     --color-card-bg: #1a1a1a;
 }
-
 body[data-theme="custom"] {
-    /* Variables inyectadas dinámicamente desde JS */
+    /* Variables dinámicas desde JS */
 }
 
 /* -----------------------------------------
@@ -77,7 +73,14 @@ body {
     overflow-x: hidden;
     transition: background-color var(--transition-speed), color var(--transition-speed);
 }
-.app-container { display: flex; flex-grow: 1; overflow: hidden; }
+.app-container {
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+/* Fondo galáctico */
 #galaxyCanvas {
     position: fixed;
     top: 0;
@@ -131,10 +134,13 @@ body {
     padding: 30px 25px;
     box-shadow: 4px 0 20px rgba(0,0,0,0.6);
     z-index: 10;
-    height: 100%;
+    height: 100vh;
     border-right: 3px solid var(--color-primary);
     overflow-y: auto;
     flex-shrink: 0;
+    position: fixed;
+    left: 0;
+    top: 0;
     transition: all 0.4s;
     backdrop-filter: blur(10px);
 }
@@ -148,7 +154,7 @@ body {
     margin-right: 12px;
     animation: pulse 2s infinite;
 }
-@keyframes pulse { 0%, 100% { box-shadow: var(--shadow-glow); } 50% { box-shadow: 0 0 30px rgba(var(--color-glow-rgb), 0.8); } }
+@keyframes pulse { 0%,100%{box-shadow:var(--shadow-glow);}50%{box-shadow:0 0 30px rgba(var(--color-glow-rgb),0.8);} }
 #sidebar h1 { font-size: 2em; font-weight: 700; color: var(--color-secondary); text-shadow: var(--shadow-glow); }
 .control-group { margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid var(--color-card-bg); }
 #themeSelect {
@@ -188,7 +194,7 @@ body {
     position: relative;
 }
 .nav-btn:hover {
-    background: rgba(var(--color-primary-rgb), 0.2);
+    background: rgba(var(--color-primary-rgb),0.2);
     border-left: 4px solid var(--color-secondary);
     transform: translateX(5px);
     box-shadow: var(--shadow-glow);
@@ -207,7 +213,15 @@ body {
 /* -----------------------------------------
    4. MAIN CONTENT
 ----------------------------------------- */
-#mainContent { flex-grow: 1; padding: 50px; max-height: calc(100vh - 80px); overflow-y: auto; backdrop-filter: blur(5px); transition: padding 0.4s; }
+#mainContent {
+    margin-left: 300px;
+    flex-grow: 1;
+    padding: 50px;
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
+    backdrop-filter: blur(5px);
+    transition: padding 0.4s;
+}
 .section-title {
     font-size: 2.8em;
     margin-bottom: 30px;
@@ -218,7 +232,7 @@ body {
     padding-bottom: 8px;
     animation: glowPulse 3s infinite ease-in-out;
 }
-@keyframes glowPulse { 0%, 100% { text-shadow: 0 0 15px var(--color-glow); } 50% { text-shadow: 0 0 25px var(--color-glow); } }
+@keyframes glowPulse { 0%,100%{text-shadow:0 0 15px var(--color-glow);}50%{text-shadow:0 0 25px var(--color-glow);} }
 .card {
     background-color: var(--color-card-bg);
     padding: 25px;
@@ -229,23 +243,23 @@ body {
     transition: all 0.3s;
     backdrop-filter: blur(10px);
 }
-.card:hover { box-shadow: 0 0 25px rgba(var(--color-glow-rgb), 0.3); transform: translateY(-3px); }
+.card:hover { box-shadow: 0 0 25px rgba(var(--color-glow-rgb),0.3); transform: translateY(-3px); }
 .card.large { min-height: 450px; max-height: 60vh; overflow-y: auto; }
 
 /* -----------------------------------------
-   5. CHAT GENERAL (ESTILO DISCORD)
+   5. CHAT, ASISTENTE IA, VIDEO, FORO, MÚSICA, PERFIL
 ----------------------------------------- */
-.chat-layout { display: flex; gap: 20px; height: 70vh; }
-.server-list, .channel-list { width: 200px; background: var(--color-card-bg); border-radius: var(--border-radius-base); padding: 15px; overflow-y: auto; }
-.server-list h3, .channel-list h3 { margin-bottom: 15px; color: var(--color-secondary); }
-.server-item, .channel-item, .friend-item { padding: 10px; margin-bottom: 5px; border-radius: 6px; cursor: pointer; transition: 0.3s; }
-.server-item:hover, .channel-item:hover, .friend-item:hover { background: rgba(var(--color-primary-rgb), 0.2); }
-.server-item.active, .channel-item.active { background: var(--color-primary); color: var(--color-sidebar-bg); }
-.add-btn { background: var(--color-secondary); border: none; color: var(--color-sidebar-bg); padding: 8px 12px; border-radius: 6px; cursor: pointer; margin-top: 10px; transition: 0.3s; }
-.add-btn:hover { box-shadow: var(--shadow-glow); }
-.chat-main { flex-grow: 1; display: flex; flex-direction: column; }
-#chatBox { flex-grow: 1; padding: 20px; overflow-y: auto; }
-.chat-input-area { display: flex; gap: 10px; padding: 15px; background: var(--color-card-bg); border-radius: var(--border-radius-base); }
+.chat-layout { display:flex;gap:20px;height:70vh; }
+.server-list, .channel-list { width:200px; background:var(--color-card-bg); border-radius:var(--border-radius-base); padding:15px; overflow-y:auto; }
+.server-list h3, .channel-list h3 { margin-bottom:15px; color:var(--color-secondary); }
+.server-item, .channel-item, .friend-item { padding:10px;margin-bottom:5px;border-radius:6px; cursor:pointer; transition:0.3s; }
+.server-item:hover, .channel-item:hover, .friend-item:hover { background:rgba(var(--color-primary-rgb),0.2); }
+.server-item.active, .channel-item.active { background:var(--color-primary); color:var(--color-sidebar-bg); }
+.add-btn { background:var(--color-secondary); border:none; color:var(--color-sidebar-bg); padding:8px 12px; border-radius:6px; cursor:pointer; margin-top:10px; transition:0.3s; }
+.add-btn:hover { box-shadow:var(--shadow-glow); }
+.chat-main { flex-grow:1; display:flex; flex-direction:column; }
+#chatBox { flex-grow:1; padding:20px; overflow-y:auto; }
+.chat-input-area { display:flex; gap:10px; padding:15px; background:var(--color-card-bg); border-radius:var(--border-radius-base); }
 
 /* -----------------------------------------
    6. ASISTENTE IA
@@ -269,8 +283,8 @@ body {
 .video-search-bar, .video-input-bar { margin-bottom: 20px; }
 .video-player-container { min-height: 400px; display: flex; align-items: center; justify-content: center; }
 .search-results { margin-top: 20px; max-height: 300px; overflow-y: auto; }
-.search-results .result-item { padding: 10px; margin-bottom: 10px; background: rgba(var(--color-primary-rgb), 0.1); border-radius: 6px; cursor: pointer; transition: 0.3s; }
-.search-results .result-item:hover { background: rgba(var(--color-primary-rgb), 0.3); }
+.search-results .result-item { padding: 10px; margin-bottom: 10px; background: rgba(var(--color-primary-rgb),0.1); border-radius: 6px; cursor: pointer; transition: 0.3s; }
+.search-results .result-item:hover { background: rgba(var(--color-primary-rgb),0.3); }
 
 /* -----------------------------------------
    8. FORO (ESTILO REDDIT)
@@ -279,12 +293,12 @@ body {
 .subreddits { width: 200px; background: var(--color-card-bg); border-radius: var(--border-radius-base); padding: 15px; overflow-y: auto; }
 .subreddits h3 { margin-bottom: 15px; color: var(--color-secondary); }
 .subreddit-item { padding: 10px; margin-bottom: 5px; border-radius: 6px; cursor: pointer; transition: 0.3s; }
-.subreddit-item:hover { background: rgba(var(--color-primary-rgb), 0.2); }
+.subreddit-item:hover { background: rgba(var(--color-primary-rgb),0.2); }
 .subreddit-item.active { background: var(--color-primary); color: var(--color-sidebar-bg); }
 .foro-main { flex-grow: 1; }
 .foro-post-creator { margin-bottom: 20px; }
 .foro-posts { padding: 20px; }
-.foro-post { margin-bottom: 20px; padding: 15px; background: rgba(var(--color-primary-rgb), 0.1); border-radius: 8px; }
+.foro-post { margin-bottom: 20px; padding: 15px; background: rgba(var(--color-primary-rgb),0.1); border-radius: 8px; }
 .foro-post .upvotes { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
 .upvote-btn, .downvote-btn { background: none; border: none; font-size: 1.2em; cursor: pointer; transition: 0.3s; }
 .upvote-btn:hover { color: var(--color-secondary); }
@@ -302,7 +316,7 @@ body {
 .music-controls { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px; }
 .music-controls button { background: var(--color-primary); border: none; color: var(--color-sidebar-bg); width: 50px; height: 50px; border-radius: 50%; cursor: pointer; transition: 0.3s; }
 .music-controls button:hover { box-shadow: var(--shadow-glow); transform: scale(1.1); }
-.galaxy-music-section { margin-top: 20px; padding: 15px; background: rgba(var(--color-secondary-rgb), 0.1); border-radius: 8px; }
+.galaxy-music-section { margin-top: 20px; padding: 15px; background: rgba(var(--color-secondary-rgb),0.1); border-radius: 8px; }
 .galaxy-music-section h4 { color: var(--color-secondary); margin-bottom: 10px; }
 .song-btn { background: var(--color-secondary); border: none; color: var(--color-sidebar-bg); padding: 10px 15px; border-radius: 6px; cursor: pointer; margin-right: 10px; transition: 0.3s; }
 .song-btn:hover { box-shadow: var(--shadow-glow); }
@@ -479,7 +493,9 @@ button {
     .app-container { flex-direction: column; }
     #sidebar { width: 100%; height: auto; border-right: none; border-bottom: 3px solid var(--color-primary); }
     #mainContent { padding: 20px; }
-    .music-player { padding: 10px 20px; height: 70px; }
+    .music-player { padding: 10px 20px; height: 70px; flex-direction: column; gap: 10px; }
+    .music-player button { width: 40px; height: 40px; margin: 0 5px; }
+    #currentSongTitle { font-size: 1em; margin: 0; }
     .section-title { font-size: 2.2em; }
     .card { padding: 20px; }
 }

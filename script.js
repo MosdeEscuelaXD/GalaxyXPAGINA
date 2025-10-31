@@ -1,5 +1,5 @@
 /* =========================================
-   🌠 GALAXY X — script.js COMPLETO MEJORADO (V9.0)
+   🌠 GALAXY X — script.js COMPLETO MEJORADO (V9.2)
    - Funcionalidades avanzadas: Chat Discord-like, Foro Reddit, Búsquedas, IA coherente, Efectos galácticos intensos
 ========================================= */
 
@@ -17,7 +17,7 @@ let isPlaying = false;
 let visualizerRunning = false;
 let analyser, bufferLength, dataArray, audioCtx, sourceNode;
 window.IA_AVATAR = 'assets/img/ai_avatar.jpg';
-window.IA_NAME = 'Luna'; // Cambiado a Luna, IA chica
+window.IA_NAME = 'Luna';
 window.aiMemory = window.aiMemory || [];
 let servers = JSON.parse(localStorage.getItem('gx_servers')) || [{ name: 'General', channels: ['general'], active: true }];
 let friends = JSON.parse(localStorage.getItem('gx_friends')) || [];
@@ -25,6 +25,10 @@ let subreddits = JSON.parse(localStorage.getItem('gx_subreddits')) || [{ name: '
 let currentServer = 0;
 let currentChannel = 'general';
 let currentSubreddit = 'general';
+let activityHistory = JSON.parse(localStorage.getItem('gx_history')) || [];
+let favoritesVideos = JSON.parse(localStorage.getItem('gx_favVideos')) || [];
+let badges = JSON.parse(localStorage.getItem('gx_badges')) || [];
+let currentPlaylist = [];
 
 /* ============================
    1) AUDIO / MÚSICA
@@ -111,36 +115,18 @@ toggleMusicBtn?.addEventListener('click', togglePlayPause);
 miniPlayPause?.addEventListener('click', togglePlayPause);
 
 /* Canción siguiente / anterior */
-nextSongBtn?.addEventListener('click', () => {
-  currentIndex = (currentIndex + 1) % songs.length;
-  changeSong();
-});
-miniNext?.addEventListener('click', () => {
-  currentIndex = (currentIndex + 1) % songs.length;
-  changeSong();
-});
-prevSongBtn?.addEventListener('click', () => {
-  currentIndex = (currentIndex - 1 + songs.length) % songs.length;
-  changeSong();
-});
-miniPrev?.addEventListener('click', () => {
-  currentIndex = (currentIndex - 1 + songs.length) % songs.length;
-  changeSong();
-});
+nextSongBtn?.addEventListener('click', () => { currentIndex = (currentIndex + 1) % songs.length; changeSong(); });
+miniNext?.addEventListener('click', () => { currentIndex = (currentIndex + 1) % songs.length; changeSong(); });
+prevSongBtn?.addEventListener('click', () => { currentIndex = (currentIndex - 1 + songs.length) % songs.length; changeSong(); });
+miniPrev?.addEventListener('click', () => { currentIndex = (currentIndex - 1 + songs.length) % songs.length; changeSong(); });
 
 /* Cambiar canción */
 function changeSong() {
   music.src = songs[currentIndex].src;
   if (songTitle) songTitle.textContent = `🎵 ${songs[currentIndex].title}`;
   if (currentSongTitle) currentSongTitle.textContent = songs[currentIndex].title;
-  if (isPlaying) {
-    music.play().catch(() => {});
-    startVisualizer();
-    if (songs[currentIndex].isGalaxy) activateGalaxyEffect();
-  } else {
-    stopVisualizer();
-    deactivateGalaxyEffect();
-  }
+  if (isPlaying) { music.play().catch(() => {}); startVisualizer(); if (songs[currentIndex].isGalaxy) activateGalaxyEffect(); }
+  else { stopVisualizer(); deactivateGalaxyEffect(); }
 }
 
 /* Formato de tiempo */
@@ -169,34 +155,23 @@ function startVisualizer() {
   drawVisualizer();
 }
 
-function stopVisualizer() {
-  visualizerRunning = false;
-  const viz = byId('galaxyVisualizer');
-  if (viz) viz.style.background = 'transparent';
-}
+function stopVisualizer() { visualizerRunning = false; const viz = byId('galaxyVisualizer'); if (viz) viz.style.background = 'transparent'; }
 
 function drawVisualizer() {
   if (!visualizerRunning) return;
   requestAnimationFrame(drawVisualizer);
   analyser.getByteFrequencyData(dataArray);
-  const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+  const avg = dataArray.reduce((a,b)=>a+b,0)/dataArray.length;
   const viz = byId('galaxyVisualizer');
   if (viz) {
-    const color = `rgba(${Math.min(avg * 2, 255)}, 0, ${255 - Math.min(avg, 255)}, 0.4)`;
+    const color = `rgba(${Math.min(avg*2,255)},0,${255-Math.min(avg,255)},0.4)`;
     viz.style.background = `radial-gradient(circle, ${color} 0%, transparent 70%)`;
-    viz.style.boxShadow = `0 0 ${avg / 2}px ${avg / 3}px ${color}`;
+    viz.style.boxShadow = `0 0 ${avg/2}px ${avg/3}px ${color}`;
   }
 }
 
-function activateGalaxyEffect() {
-  const canvas = byId('galaxyCanvas');
-  if (canvas) canvas.classList.add('galaxy-active');
-}
-
-function deactivateGalaxyEffect() {
-  const canvas = byId('galaxyCanvas');
-  if (canvas) canvas.classList.remove('galaxy-active');
-}
+function activateGalaxyEffect() { const canvas = byId('galaxyCanvas'); if(canvas) canvas.classList.add('galaxy-active'); }
+function deactivateGalaxyEffect() { const canvas = byId('galaxyCanvas'); if(canvas) canvas.classList.remove('galaxy-active'); }
 
 /* ============================
    2) TEMAS DINÁMICOS
@@ -207,14 +182,8 @@ themeSelect?.addEventListener('change', () => {
   const theme = themeSelect.value;
   document.body.setAttribute('data-theme', theme);
   localStorage.setItem('gx_theme', theme);
-  if (theme === 'custom') {
-    customColorInput.style.display = 'block';
-    customColorInput.addEventListener('input', () => {
-      document.documentElement.style.setProperty('--color-primary', customColorInput.value);
-    });
-  } else {
-    customColorInput.style.display = 'none';
-  }
+  if (theme==='custom') { customColorInput.style.display='block'; customColorInput.addEventListener('input', ()=>{ document.documentElement.style.setProperty('--color-primary', customColorInput.value); }); }
+  else customColorInput.style.display='none';
 });
 
 /* ============================
@@ -222,40 +191,28 @@ themeSelect?.addEventListener('change', () => {
 ============================*/
 const canvas = byId('galaxyCanvas');
 const ctx = canvas?.getContext('2d');
-let w = canvas ? canvas.width = innerWidth : innerWidth;
-let h = canvas ? canvas.height = innerHeight : innerHeight;
+let w = canvas ? canvas.width=innerWidth : innerWidth;
+let h = canvas ? canvas.height=innerHeight : innerHeight;
 
-addEventListener('resize', () => {
-  w = canvas ? canvas.width = innerWidth : innerWidth;
-  h = canvas ? canvas.height = innerHeight : innerHeight;
-});
+addEventListener('resize', ()=>{ w = canvas ? canvas.width=innerWidth : innerWidth; h = canvas ? canvas.height=innerHeight : innerHeight; });
+canvas && (canvas.style.pointerEvents='none');
 
-canvas && (canvas.style.pointerEvents = 'none');
-
-const baseStars = Array.from({ length: 220 }, () => ({
-  x: Math.random() * w,
-  y: Math.random() * h,
-  r: Math.random() * 1.8 + 0.4,
-  alpha: Math.random() * 0.9,
-  speed: Math.random() * 0.5 + 0.1
-}));
+const baseStars = Array.from({length:220},()=>({x:Math.random()*w,y:Math.random()*h,r:Math.random()*1.8+0.4,alpha:Math.random()*0.9,speed:Math.random()*0.5+0.1}));
 
 function draw() {
-  if (!ctx) return;
-  ctx.clearRect(0, 0, w, h);
-  ctx.fillStyle = 'rgba(10,6,30,0.95)';
-  ctx.fillRect(0, 0, w, h);
-
-  for (let s of baseStars) {
+  if(!ctx) return;
+  ctx.clearRect(0,0,w,h);
+  ctx.fillStyle='rgba(10,6,30,0.95)';
+  ctx.fillRect(0,0,w,h);
+  for(let s of baseStars){
     ctx.beginPath();
-    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(255,255,255,${s.alpha})`;
+    ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(255,255,255,${s.alpha})`;
     ctx.fill();
-    s.alpha += (Math.random() - 0.5) * 0.02;
-    if (s.alpha < 0.25) s.alpha = 0.6;
-    if (s.alpha > 1) s.alpha = 0.6;
+    s.alpha += (Math.random()-0.5)*0.02;
+    if(s.alpha<0.25)s.alpha=0.6;
+    if(s.alpha>1)s.alpha=0.6;
   }
-
   requestAnimationFrame(draw);
 }
 draw();
@@ -264,172 +221,45 @@ draw();
    4) NAVEGACIÓN SECCIONES
 ============================*/
 function showSection(sectionId) {
-  document.querySelectorAll('.section').forEach(sec => sec.classList.add('hidden'));
+  document.querySelectorAll('.section').forEach(sec=>sec.classList.add('hidden'));
   byId(sectionId)?.classList.remove('hidden');
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.querySelector(`.nav-btn[data-section="${sectionId}"]`)?.classList.add('active');
-  if (sectionId === 'chat') loadServers();
-  if (sectionId === 'foro') loadSubreddits();
+  if(sectionId==='chat') loadServers();
+  if(sectionId==='foro') loadSubreddits();
 }
-
-document.querySelectorAll('.nav-btn').forEach(btn => {
-  btn.addEventListener('click', () => showSection(btn.dataset.section));
-});
+document.querySelectorAll('.nav-btn').forEach(btn=>{ btn.addEventListener('click',()=>showSection(btn.dataset.section)); });
 
 /* ============================
    5) CHAT GENERAL (ESTILO DISCORD)
 ============================*/
-function loadServers() {
-  const serverList = byId('serverList');
-  serverList.innerHTML = '<h3>Servidores</h3>';
-  servers.forEach((server, index) => {
-    const item = document.createElement('li');
-    item.className = `server-item ${server.active ? 'active' : ''}`;
-    item.textContent = server.name;
-    item.addEventListener('click', () => switchServer(index));
-    serverList.appendChild(item);
-  });
-  const addBtn = document.createElement('button');
-  addBtn.className = 'add-btn';
-  addBtn.textContent = '➕';
-  addBtn.addEventListener('click', () => {
-    const name = prompt('Nombre del servidor:');
-    if (name) {
-      servers.push({ name, channels: ['general'], active: false });
-      localStorage.setItem('gx_servers', JSON.stringify(servers));
-      loadServers();
-    }
-  });
-  serverList.appendChild(addBtn);
-  loadChannels();
-  loadFriends();
-}
+function loadServers(){ const serverList=byId('serverList'); serverList.innerHTML='<h3>Servidores</h3>'; servers.forEach((server,index)=>{ const item=document.createElement('li'); item.className=`server-item ${server.active?'active':''}`; item.textContent=server.name; item.addEventListener('click',()=>switchServer(index)); serverList.appendChild(item); }); const addBtn=document.createElement('button'); addBtn.className='add-btn'; addBtn.textContent='➕'; addBtn.addEventListener('click',()=>{ const name=prompt('Nombre del servidor:'); if(name){ servers.push({name,channels:['general'],active:false}); localStorage.setItem('gx_servers',JSON.stringify(servers)); loadServers(); } }); serverList.appendChild(addBtn); loadChannels(); loadFriends(); }
 
-function switchServer(index) {
-  servers.forEach(s => s.active = false);
-  servers[index].active = true;
-  currentServer = index;
-  localStorage.setItem('gx_servers', JSON.stringify(servers));
-  loadServers();
-}
+function switchServer(index){ servers.forEach(s=>s.active=false); servers[index].active=true; currentServer=index; localStorage.setItem('gx_servers',JSON.stringify(servers)); loadServers(); }
 
-function loadChannels() {
-  const channelList = byId('channelList');
-  channelList.innerHTML = '<h3>Canales</h3>';
-  servers[currentServer].channels.forEach(channel => {
-    const item = document.createElement('li');
-    item.className = `channel-item ${channel === currentChannel ? 'active' : ''}`;
-    item.textContent = `#${channel}`;
-    item.addEventListener('click', () => switchChannel(channel));
-    channelList.appendChild(item);
-  });
-}
+function loadChannels(){ const channelList=byId('channelList'); channelList.innerHTML='<h3>Canales</h3>'; servers[currentServer].channels.forEach(channel=>{ const item=document.createElement('li'); item.className=`channel-item ${channel===currentChannel?'active':''}`; item.textContent=`#${channel}`; item.addEventListener('click',()=>switchChannel(channel)); channelList.appendChild(item); }); }
 
-function switchChannel(channel) {
-  currentChannel = channel;
-  loadChannels();
-  // Cargar mensajes del canal (simulado)
-}
+function switchChannel(channel){ currentChannel=channel; loadChannels(); }
 
-function loadFriends() {
-  const friendsList = byId('friends');
-  friendsList.innerHTML = '';
-  friends.forEach(friend => {
-    const item = document.createElement('li');
-    item.className = 'friend-item';
-    item.textContent = friend;
-    friendsList.appendChild(item);
-  });
-  const addBtn = document.createElement('button');
-  addBtn.className = 'add-btn';
-  addBtn.textContent = '➕ Añadir Amigo';
-  addBtn.addEventListener('click', () => {
-    const name = prompt('Nombre del amigo:');
-    if (name) {
-      friends.push(name);
-      localStorage.setItem('gx_friends', JSON.stringify(friends));
-      loadFriends();
-    }
-  });
-  byId('channelList').appendChild(addBtn);
-}
+function loadFriends(){ const friendsList=byId('friends'); friendsList.innerHTML=''; friends.forEach(friend=>{ const item=document.createElement('li'); item.className='friend-item'; item.textContent=friend; friendsList.appendChild(item); }); const addBtn=document.createElement('button'); addBtn.className='add-btn'; addBtn.textContent='➕ Añadir Amigo'; addBtn.addEventListener('click',()=>{ const name=prompt('Nombre del amigo:'); if(name){ friends.push(name); localStorage.setItem('gx_friends',JSON.stringify(friends)); loadFriends(); } }); byId('channelList').appendChild(addBtn); }
 
-function appendChatMsg(text, isUser = true) {
-  const chat = byId('chatBox');
-  const name = localStorage.getItem('username') || 'Navegante';
-  const avatar = localStorage.getItem('avatar') || 'https://i.ibb.co/6y40F2r/default-avatar.png';
-  const d = document.createElement('div');
-  d.className = isUser ? 'user-message' : 'system-message';
-  d.innerHTML = isUser
-    ? `<div><p><b>${name}:</b> ${text}</p></div><img src="${avatar}" class="chatAvatar">`
-    : `<img src="assets/img/ai_avatar.jpg" class="chatAvatar"><div><p><b>Sistema:</b> ${text}</p></div>`;
-  chat.appendChild(d);
-  chat.scrollTop = chat.scrollHeight;
-  localStorage.setItem('chatHistory', chat.innerHTML);
-}
+function appendChatMsg(text,isUser=true){ const chat=byId('chatBox'); const name=localStorage.getItem('username')||'Navegante'; const avatar=localStorage.getItem('avatar')||'https://i.ibb.co/6y40F2r/default-avatar.png'; const d=document.createElement('div'); d.className=isUser?'user-message':'system-message'; d.innerHTML=isUser?`<div><p><b>${name}:</b> ${text}</p></div><img src="${avatar}" class="chatAvatar">`:`<img src="${window.IA_AVATAR}" class="chatAvatar"><div><p><b>${window.IA_NAME}:</b> ${text}</p></div>`; chat.appendChild(d); chat.scrollTop=chat.scrollHeight; localStorage.setItem('chatHistory',chat.innerHTML); }
 
-function sendChat() {
-  const input = byId('chatInput');
-  const msg = input?.value.trim();
-  if (!msg) return;
-  appendChatMsg(msg, true);
-  input.value = '';
-}
+function sendChat(){ const input=byId('chatInput'); const msg=input?.value.trim(); if(!msg) return; appendChatMsg(msg,true); input.value=''; }
 
-byId('sendChatBtn')?.addEventListener('click', sendChat);
-byId('chatInput')?.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
-});
-byId('clearChatBtn')?.addEventListener('click', () => {
-  byId('chatBox').innerHTML = '';
-  localStorage.removeItem('chatHistory');
-});
+byId('sendChatBtn')?.addEventListener('click',sendChat);
+byId('chatInput')?.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendChat(); } });
+byId('clearChatBtn')?.addEventListener('click',()=>{ byId('chatBox').innerHTML=''; localStorage.removeItem('chatHistory'); });
 
 /* ============================
    6) PERFIL DE USUARIO
 ============================*/
-function saveProfile() {
-  const username = byId('username')?.value.trim();
-  if (!username) return alert('Ingresa tu nombre de usuario');
-  const email = byId('userEmail')?.value.trim();
-  const file = byId('userAvatarInput')?.files?.[0];
+function saveProfile(){ const username=byId('username')?.value.trim(); if(!username) return alert('Ingresa tu nombre de usuario'); const email=byId('userEmail')?.value.trim(); const file=byId('userAvatarInput')?.files?.[0]; localStorage.setItem('username',username); if(email) localStorage.setItem('userEmail',email); const updatePreview=()=>{ showProfilePreview(); alert('Perfil guardado con éxito.'); }; if(file){ const reader=new FileReader(); reader.onload=e=>{ localStorage.setItem('avatar',e.target.result); updatePreview(); }; reader.readAsDataURL(file); } else updatePreview(); }
 
-  localStorage.setItem('username', username);
-  if (email) localStorage.setItem('userEmail', email);
+function showProfilePreview(){ const name=localStorage.getItem('username')||'Navegante'; const avatar=localStorage.getItem('avatar')||'https://i.ibb.co/6y40F2r/default-avatar.png'; byId('profilePreview').innerHTML=`<img src="${avatar}" class="profileAvatar"><h3>${name}</h3>`; byId('profileUsernameDisplay').textContent=name; if(byId('username')) byId('username').value=name; if(byId('userEmail')) byId('userEmail').value=localStorage.getItem('userEmail')||''; }
 
-  const updatePreview = () => {
-    showProfilePreview();
-    alert('Perfil guardado con éxito.');
-  };
-
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = e => {
-      localStorage.setItem('avatar', e.target.result);
-      updatePreview();
-    };
-    reader.readAsDataURL(file);
-  } else updatePreview();
-}
-
-function showProfilePreview() {
-  const name = localStorage.getItem('username') || 'Navegante';
-  const avatar = localStorage.getItem('avatar') || 'https://i.ibb.co/6y40F2r/default-avatar.png';
-  byId('profilePreview').innerHTML = `<img src="${avatar}" class="profileAvatar"><h3>${name}</h3>`;
-  byId('profileUsernameDisplay').textContent = name;
-  if (byId('username')) byId('username').value = name;
-  if (byId('userEmail')) byId('userEmail').value = localStorage.getItem('userEmail') || '';
-}
-
-byId('saveProfileBtn')?.addEventListener('click', saveProfile);
-byId('clearProfileBtn')?.addEventListener('click', () => {
-  if (confirm('¿Borrar perfil local?')) {
-    localStorage.removeItem('username');
-    localStorage.removeItem('avatar');
-    localStorage.removeItem('userEmail');
-    showProfilePreview();
-  }
-});
+byId('saveProfileBtn')?.addEventListener('click',saveProfile);
+byId('clearProfileBtn')?.addEventListener('click',()=>{ if(confirm('¿Borrar perfil local?')){ localStorage.removeItem('username'); localStorage.removeItem('avatar'); localStorage.removeItem('userEmail'); showProfilePreview(); } });
 
 /* ============================
    7) FORO (ESTILO REDDIT)
@@ -470,7 +300,9 @@ function switchSubreddit(index) {
 function loadPosts() {
   const foroBox = byId('foroBox');
   foroBox.innerHTML = '';
-  subreddits.find(s => s.name === currentSubreddit).posts.forEach(post => {
+  const subreddit = subreddits.find(s => s.name === currentSubreddit);
+  if (!subreddit) return;
+  subreddit.posts.forEach((post, idx) => {
     const postEl = document.createElement('div');
     postEl.className = 'foro-post';
     postEl.innerHTML = `
@@ -479,22 +311,36 @@ function loadPosts() {
         <span>${post.upvotes}</span>
         <button class="downvote-btn">⬇️</button>
       </div>
-      <div>
+      <div class="post-content">
         <h4>${post.title}</h4>
         <p>${post.content}</p>
         <small>Por ${post.author} - ${post.comments.length} comentarios</small>
         <div class="comments">
           ${post.comments.map(comment => `<div class="comment"><strong>${comment.author}:</strong> ${comment.text}</div>`).join('')}
         </div>
+        <input type="text" placeholder="Comentar..." class="comment-input" data-post="${idx}">
+        <button class="comment-btn" data-post="${idx}">Enviar</button>
       </div>
     `;
+    // Upvote
     postEl.querySelector('.upvote-btn').addEventListener('click', () => {
       post.upvotes++;
       localStorage.setItem('gx_subreddits', JSON.stringify(subreddits));
       loadPosts();
     });
+    // Downvote
     postEl.querySelector('.downvote-btn').addEventListener('click', () => {
       post.upvotes = Math.max(0, post.upvotes - 1);
+      localStorage.setItem('gx_subreddits', JSON.stringify(subreddits));
+      loadPosts();
+    });
+    // Comentarios
+    postEl.querySelector('.comment-btn').addEventListener('click', () => {
+      const input = postEl.querySelector('.comment-input');
+      const text = input.value.trim();
+      if (!text) return;
+      const user = localStorage.getItem('username') || 'Navegante';
+      post.comments.push({ author: user, text });
       localStorage.setItem('gx_subreddits', JSON.stringify(subreddits));
       loadPosts();
     });
@@ -502,16 +348,18 @@ function loadPosts() {
   });
 }
 
+// Botón para publicar nuevo post
 byId('postForoBtn')?.addEventListener('click', postForo);
 function postForo() {
   const title = byId('foroTitulo')?.value.trim();
-  const comment = byId('foroComentario')?.value.trim();
-  if (!title || !comment) return alert('Completa título y comentario');
+  const content = byId('foroComentario')?.value.trim();
+  if (!title || !content) return alert('Completa título y comentario');
   const user = localStorage.getItem('username') || 'Navegante';
   const subreddit = subreddits.find(s => s.name === currentSubreddit);
+  if (!subreddit) return;
   subreddit.posts.unshift({
     title,
-    content: comment,
+    content,
     author: user,
     upvotes: 0,
     comments: []
@@ -523,7 +371,7 @@ function postForo() {
 }
 
 /* ============================
-   8) ASISTENTE IA (MEJORADO: LUNA, RESPUESTAS COHERENTES)
+   8) ASISTENTE IA (LUNA)
 ============================*/
 function appendAIMsg(container, who, text) {
   const div = document.createElement('div');
@@ -547,11 +395,11 @@ function talkToAssistant() {
   appendAIMsg(chat, 'user', input.value);
   input.value = '';
 
-  // Respuestas coherentes y sociales de Luna (IA chica)
+  // Respuestas de Luna
   let response = '¡Hola! Soy Luna, tu copiloto cósmico. ¿En qué puedo ayudarte hoy?';
   if (msg.includes('hola') || msg.includes('hi')) response = '¡Hola! 😊 Me alegra verte en Galaxy X. ¿Qué tal tu día en el espacio?';
   else if (msg.includes('ayuda') || msg.includes('help')) response = 'Claro, estoy aquí para ayudarte. ¿Necesitas info sobre el foro, música o algo más?';
-  else if (msg.includes('musica') || msg.includes('música')) response = '¡Me encanta la música! Prueba "Mirror Temple" o "Ender" en la sección Música. ¿Quieres que te cuente sobre ellas?';
+  else if (msg.includes('musica') || msg.includes('música')) response = '¡Me encanta la música! Prueba "Mirror Temple" o "Ender". ¿Quieres que te cuente sobre ellas?';
   else if (msg.includes('foro') || msg.includes('reddit')) response = 'El foro es como Reddit, pero galáctico. Crea posts, vota y comenta. ¡Únete a r/general!';
   else if (msg.includes('chat') || msg.includes('discord')) response = 'El chat es estilo Discord: servidores, canales y amigos. ¡Crea uno y conecta!';
   else if (msg.includes('perfil')) response = 'Tu perfil es personalizable. Sube un avatar y guarda tu info. ¿Quieres consejos?';
@@ -564,19 +412,21 @@ function talkToAssistant() {
 }
 
 byId('sendAIBtn')?.addEventListener('click', talkToAssistant);
+byId('assistantInput')?.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); talkToAssistant(); }
+});
 byId('clearAIBtn')?.addEventListener('click', () => {
   byId('assistantChat').innerHTML = '';
   window.aiMemory = [];
 });
 
 /* ============================
-   9) VIDEOS / YOUTUBE (CON BÚSQUEDA)
+   9) VIDEOS / YOUTUBE
 ============================*/
 byId('searchYoutubeBtn')?.addEventListener('click', searchYoutube);
 function searchYoutube() {
   const query = byId('youtubeSearch')?.value.trim();
   if (!query) return alert('Ingresa un término de búsqueda.');
-  // Simulación de búsqueda (en producción, usa YouTube API)
   const results = [
     { title: 'Video de Galaxy X', id: 'dQw4w9WgXcQ' },
     { title: 'Tutorial Espacial', id: 'dQw4w9WgXcQ' }
@@ -609,13 +459,12 @@ function playYoutube(id) {
 }
 
 /* ============================
-   10) MÚSICA AVANZADA (CON BÚSQUEDA)
+   10) MÚSICA AVANZADA
 ============================*/
 byId('searchMusicBtn')?.addEventListener('click', searchMusic);
 function searchMusic() {
   const query = byId('musicSearch')?.value.trim();
   if (!query) return alert('Ingresa un término de búsqueda.');
-  // Simulación de búsqueda
   const results = [
     { title: 'Canción Espacial', src: 'assets/audio/Mirror_Temple.mp3' },
     { title: 'Ritmo Cósmico', src: 'assets/audio/Ender.mp3' }
@@ -634,7 +483,6 @@ function searchMusic() {
 byId('playMusicBtn')?.addEventListener('click', () => {
   const link = byId('musicLink')?.value.trim();
   if (!link) return alert('Pega un enlace de música.');
-  // Simulación: en producción, maneja enlaces externos
   playCustomSong(link, 'Canción Personalizada');
 });
 
@@ -649,15 +497,6 @@ function playCustomSong(src, title) {
   startVisualizer();
 }
 
-// Botones de canciones de GalaxyX
-document.querySelectorAll('.galaxy-song').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const src = btn.dataset.src;
-    const title = btn.dataset.title;
-    playCustomSong(src, title);
-  });
-});
-
 /* ============================
    11) INICIALIZACIÓN
 ============================*/
@@ -666,15 +505,12 @@ document.addEventListener('DOMContentLoaded', () => {
   changeSong();
   showSection('chat');
 
-  // Historial chat
   const chatHistory = localStorage.getItem('chatHistory');
   if (chatHistory) byId('chatBox').innerHTML = chatHistory;
   else appendChatMsg('¡Bienvenido al Chat General!', 'system');
 
-  // Perfil
   showProfilePreview();
 
-  // Memoria IA
   if (window.aiMemory.length > 0) {
     const chat = byId('assistantChat');
     window.aiMemory.forEach(m => {
@@ -683,13 +519,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Tema guardado
   const savedTheme = localStorage.getItem('gx_theme') || 'galaxy';
   document.body.setAttribute('data-theme', savedTheme);
   if (themeSelect) themeSelect.value = savedTheme;
   if (savedTheme === 'custom') customColorInput.style.display = 'block';
   else customColorInput.style.display = 'none';
 
-  // Volumen inicial
   miniVolume.value = music.volume;
 });
