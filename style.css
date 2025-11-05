@@ -1,8 +1,9 @@
 /* =========================================
-   🌠 GALAXY X | STYLES COMPLETO MEJORADO (V9.2)
-   - Sidebar fijo y contenido a la derecha
-   - Mantiene todo tu diseño original
-   - Footer, reproductor global y responsive optimizados
+   🌠 GALAXY X | STYLES COMPLETO MEJORADO (V10.0)
+   - Layout horizontal: sidebar fijo, contenido a la derecha
+   - Tema Nieve y Oscuro Estelar añadidos
+   - Animaciones galácticas solo con música
+   - Foto perfil pequeña/circular, botones eliminar, responsive total
 ========================================= */
 
 /* -----------------------------------------
@@ -55,6 +56,32 @@ body[data-theme="neon"] {
     --color-sidebar-bg: #0d0d0d;
     --color-card-bg: #1a1a1a;
 }
+body[data-theme="snow"] {
+    --color-primary: #e0f7ff;
+    --color-secondary: #87ceeb;
+    --color-primary-rgb: 224, 247, 255;
+    --color-secondary-rgb: 135, 206, 235;
+    --color-background: #f0f8ff;
+    --color-sidebar-bg: #e6f7ff;
+    --color-card-bg: #f0ffff;
+    --color-text: #000;
+    --color-muted: #666;
+    --color-glow: #87ceeb;
+    --color-glow-rgb: 135, 206, 235;
+}
+body[data-theme="darkStellar"] {
+    --color-primary: #4b0082;
+    --color-secondary: #2e003e;
+    --color-primary-rgb: 75, 0, 130;
+    --color-secondary-rgb: 46, 0, 62;
+    --color-background: #000000;
+    --color-sidebar-bg: #1a001a;
+    --color-card-bg: #2a002a;
+    --color-text: #e0e0e0;
+    --color-muted: #888;
+    --color-glow: #4b0082;
+    --color-glow-rgb: 75, 0, 130;
+}
 body[data-theme="custom"] {
     /* Variables dinámicas desde JS */
 }
@@ -80,7 +107,7 @@ body {
     overflow: hidden;
 }
 
-/* Fondo galáctico */
+/* Fondo galáctico con nieve en tema snow */
 #galaxyCanvas {
     position: fixed;
     top: 0;
@@ -112,6 +139,14 @@ body {
     animation: twinkleIntense 1.5s infinite ease-in-out;
     opacity: 1;
     box-shadow: 0 0 10px var(--color-secondary);
+}
+.star.snow-flake {
+    background: #e0f7ff;
+    animation: snowFall 5s infinite linear;
+}
+@keyframes snowFall {
+    0% { transform: translateY(-10px); }
+    100% { transform: translateY(100vh); }
 }
 @keyframes twinkle {
     0%, 100% { opacity: 0.3; transform: scale(1); }
@@ -209,6 +244,7 @@ body {
 .status-indicator { text-align: left; padding-top: 20px; margin-top: 25px; font-size: 0.9em; color: var(--color-muted); border-top: 1px solid var(--color-card-bg); }
 #accountStatusSidebar { display: flex; align-items: center; gap: 12px; font-size: 1.1em; color: var(--color-text); }
 .miniAvatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; box-shadow: var(--shadow-glow); }
+.notifications { color: var(--color-danger); font-weight: bold; }
 
 /* -----------------------------------------
    4. MAIN CONTENT
@@ -247,7 +283,7 @@ body {
 .card.large { min-height: 450px; max-height: 60vh; overflow-y: auto; }
 
 /* -----------------------------------------
-   5. CHAT, ASISTENTE IA, VIDEO, FORO, MÚSICA, PERFIL
+   5. CHAT Y ASISTENTE IA
 ----------------------------------------- */
 .chat-layout { display:flex;gap:20px;height:70vh; }
 .server-list, .channel-list { width:200px; background:var(--color-card-bg); border-radius:var(--border-radius-base); padding:15px; overflow-y:auto; }
@@ -257,9 +293,17 @@ body {
 .server-item.active, .channel-item.active { background:var(--color-primary); color:var(--color-sidebar-bg); }
 .add-btn { background:var(--color-secondary); border:none; color:var(--color-sidebar-bg); padding:8px 12px; border-radius:6px; cursor:pointer; margin-top:10px; transition:0.3s; }
 .add-btn:hover { box-shadow:var(--shadow-glow); }
+.danger-btn { background:var(--color-danger); color:var(--color-sidebar-bg); border:none; padding:8px 12px; border-radius:6px; cursor:pointer; margin-top:10px; transition:0.3s; }
+.danger-btn:hover { background:#d35400; box-shadow:0 0 12px var(--color-danger); }
 .chat-main { flex-grow:1; display:flex; flex-direction:column; }
 #chatBox { flex-grow:1; padding:20px; overflow-y:auto; }
 .chat-input-area { display:flex; gap:10px; padding:15px; background:var(--color-card-bg); border-radius:var(--border-radius-base); }
+.user-message, .ai-message { display:flex; align-items:flex-start; padding:12px 16px; border-radius:10px; width:95%; max-width:600px; animation:fadeIn 0.4s ease-out; transition: all 0.25s ease; position:relative; }
+.user-message:hover .delete-msg-btn, .ai-message:hover .delete-msg-btn { opacity:1; }
+.delete-msg-btn { opacity:0; position:absolute; top:5px; right:5px; background:var(--color-danger); border:none; color:white; border-radius:50%; width:20px; height:20px; cursor:pointer; font-size:0.8em; transition:0.3s; }
+.delete-msg-btn:hover { background:#d35400; }
+.chatAvatar { width:32px; height:32px; border-radius:50%; object-fit:cover; box-shadow:0 0 6px var(--color-glow); transition: transform 0.2s ease; margin-right:10px; }
+.chatAvatar:hover { transform: scale(1.05); }
 
 /* -----------------------------------------
    6. ASISTENTE IA
@@ -280,10 +324,37 @@ body {
 /* -----------------------------------------
    7. VIDEOS
 ----------------------------------------- */
-.video-search-bar, .video-input-bar { margin-bottom: 20px; }
-.video-player-container { min-height: 400px; display: flex; align-items: center; justify-content: center; }
-.search-results { margin-top: 20px; max-height: 300px; overflow-y: auto; }
-.search-results .result-item { padding: 10px; margin-bottom: 10px; background: rgba(var(--color-primary-rgb),0.1); border-radius: 6px; cursor: pointer; transition: 0.3s; }
+.video-search-bar, .video-input-bar {
+  margin-bottom: 20px;
+}
+
+.video-player-container {
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-results {
+  margin-top: 20px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.search-results .result-item {
+  padding: 10px;
+  margin-bottom: 10px;
+  background: rgba(var(--color-primary-rgb), 0.1);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.search-results .result-item:hover {
+  background: rgba(var(--color-primary-rgb), 0.3);
+  transform: scale(1.02);
+}
+
 .search-results .result-item:hover { background: rgba(var(--color-primary-rgb),0.3); }
 
 /* -----------------------------------------
@@ -292,9 +363,11 @@ body {
 .foro-layout { display: flex; gap: 20px; height: 70vh; }
 .subreddits { width: 200px; background: var(--color-card-bg); border-radius: var(--border-radius-base); padding: 15px; overflow-y: auto; }
 .subreddits h3 { margin-bottom: 15px; color: var(--color-secondary); }
-.subreddit-item { padding: 10px; margin-bottom: 5px; border-radius: 6px; cursor: pointer; transition: 0.3s; }
+.subreddit-item { padding: 10px; margin-bottom: 5px; border-radius: 6px; cursor: pointer; transition: 0.3s; display: flex; justify-content: space-between; align-items: center; }
 .subreddit-item:hover { background: rgba(var(--color-primary-rgb),0.2); }
 .subreddit-item.active { background: var(--color-primary); color: var(--color-sidebar-bg); }
+.delete-sub-btn { background: var(--color-danger); border: none; color: white; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; font-size: 0.8em; transition: 0.3s; }
+.delete-sub-btn:hover { background: #d35400; }
 .foro-main { flex-grow: 1; }
 .foro-post-creator { margin-bottom: 20px; }
 .foro-posts { padding: 20px; }
@@ -325,14 +398,23 @@ body {
 @keyframes visualizerPulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
 
 /* -----------------------------------------
-   10. PERFIL E INFO
+   10. EXPLORADOR (MOTOR DE BÚSQUEDA)
+----------------------------------------- */
+.search-engine { padding: 20px; }
+.search-engine input { margin-bottom: 15px; }
+.search-results { margin-top: 20px; max-height: 400px; overflow-y: auto; }
+.search-results .result-item { padding: 10px; margin-bottom: 10px; background: rgba(var(--color-primary-rgb),0.1); border-radius: 6px; cursor: pointer; transition: 0.3s; }
+.search-results .result-item:hover { background: rgba(var(--color-primary-rgb),0.3); }
+
+/* -----------------------------------------
+   11. PERFIL E INFO
 ----------------------------------------- */
 .profile-preview { margin-top: 20px; text-align: center; }
 .info-card { max-width: 800px; }
 .info-card iframe { width: 100%; height: 400px; border-radius: 8px; }
 
 /* -----------------------------------------
-   11. FOOTER: REPRODUCTOR GLOBAL
+   12. FOOTER: REPRODUCTOR GLOBAL
 ----------------------------------------- */
 .music-player {
     width: 100%;
@@ -397,7 +479,7 @@ body {
 }
 
 /* -----------------------------------------
-   12. FORMULARIOS Y BOTONES
+   13. FORMULARIOS Y BOTONES
 ----------------------------------------- */
 input:not([type="range"]), textarea, select {
     background: var(--color-sidebar-bg);
@@ -456,7 +538,7 @@ button {
 }
 
 /* -----------------------------------------
-   13. SCROLLBAR PERSONALIZADO
+   14. SCROLLBAR PERSONALIZADO
 ----------------------------------------- */
 ::-webkit-scrollbar {
     width: 10px;
@@ -473,7 +555,7 @@ button {
 }
 
 /* -----------------------------------------
-   14. ANIMACIONES Y EFECTOS
+   15. ANIMACIONES Y EFECTOS
 ----------------------------------------- */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
@@ -481,7 +563,7 @@ button {
 }
 
 /* -----------------------------------------
-   15. RESPONSIVE
+   16. RESPONSIVE
 ----------------------------------------- */
 @media (max-width: 1024px) {
     #sidebar { width: 250px; }

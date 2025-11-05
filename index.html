@@ -27,14 +27,14 @@
                 <option value="ocean">🌊 Océano</option>
                 <option value="lava">🔥 Lava</option>
                 <option value="neon">⚡ Neón Verde</option>
+                <option value="snow">❄️ Nieve</option>
+                <option value="darkStellar">🌑 Oscuro Estelar</option>
                 <option value="custom">🌈 Color Personalizado</option>
             </select>
             <input type="color" id="customColorInput" style="display: none;">
-            <button id="darkModeToggle" class="secondary-btn">🌙 Modo Oscuro Estelar</button>
-            <button id="surpriseBtn" class="secondary-btn">🎉 Sorpresa</button>
         </div>
 
-        <!-- Navegación principal -->
+        <!-- Navegación principal (sin duplicados) -->
         <nav>
             <ul>
                 <li><button class="nav-btn active" data-section="chat">💬 Chat General</button></li>
@@ -42,8 +42,7 @@
                 <li><button class="nav-btn" data-section="foro">📜 Foro</button></li>
                 <li><button class="nav-btn" data-section="assistant">🤖 Asistente IA</button></li>
                 <li><button class="nav-btn" data-section="musicAdvanced">🎵 Música</button></li>
-                <li><button class="nav-btn" data-section="explorer">🚀 Explorador</button></li>
-                <li><button class="nav-btn" data-section="trivia">🧠 Trivia Galáctica</button></li>
+                <li><button class="nav-btn" data-section="explorer">🔍 Explorador (Búsqueda)</button></li>
                 <li><button class="nav-btn" data-section="perfil">👤 Perfil</button></li>
                 <li><button class="nav-btn" data-section="info">ℹ️ Info</button></li>
             </ul>
@@ -56,7 +55,7 @@
         </div>
     </aside>
 
-    <!-- CONTENIDO PRINCIPAL -->
+    <!-- CONTENIDO PRINCIPAL (LAYOUT HORIZONTAL) -->
     <main id="mainContent" role="main" aria-live="polite">
 
         <!-- CHAT GENERAL -->
@@ -68,7 +67,8 @@
                     <ul id="servers">
                         <li class="server-item active" data-server="general">🌌 General</li>
                     </ul>
-                    <button id="addServerBtn" class="add-btn">➕</button>
+                    <button id="addServerBtn" class="add-btn">➕ Crear Servidor</button>
+                    <button id="deleteServerBtn" class="danger-btn">🗑️ Eliminar Servidor</button>
                 </div>
                 <div id="channelList" class="channel-list card">
                     <h3>Canales</h3>
@@ -143,9 +143,9 @@
                 <div id="subreddits" class="subreddits card">
                     <h3>Subreddits</h3>
                     <ul>
-                        <li class="subreddit-item active" data-sub="general">r/general</li>
-                        <li class="subreddit-item" data-sub="music">r/music</li>
-                        <li class="subreddit-item" data-sub="science">r/science</li>
+                        <li class="subreddit-item active" data-sub="general">r/general <button class="delete-sub-btn" data-sub="general">🗑️</button></li>
+                        <li class="subreddit-item" data-sub="music">r/music <button class="delete-sub-btn" data-sub="music">🗑️</button></li>
+                        <li class="subreddit-item" data-sub="science">r/science <button class="delete-sub-btn" data-sub="science">🗑️</button></li>
                     </ul>
                     <button id="createSubredditBtn" class="add-btn">➕ Crear Subreddit</button>
                 </div>
@@ -203,25 +203,13 @@
             </div>
         </section>
 
-                <!-- EXPLORADOR -->
+        <!-- EXPLORADOR (MOTOR DE BÚSQUEDA ESTILO GOOGLE) -->
         <section id="explorer" class="section hidden">
-            <h2 class="section-title glow">🚀 Explorador Estelar</h2>
-            <div class="card explorer-game">
-                <p>¡Navega y captura estrellas!</p>
-                <canvas id="explorerCanvas" width="600" height="400"></canvas>
-                <button id="startExplorerBtn" class="primary-btn">Iniciar</button>
-                <p id="explorerScore">Puntuación: 0</p>
-            </div>
-        </section>
-
-        <!-- TRIVIA GALÁCTICA -->
-        <section id="trivia" class="section hidden">
-            <h2 class="section-title glow">🧠 Trivia Galáctica</h2>
-            <div class="card trivia-game">
-                <p id="triviaQuestion">Pregunta aquí</p>
-                <div id="triviaOptions"></div>
-                <button id="nextTriviaBtn" class="primary-btn">Siguiente</button>
-                <p id="triviaScore">Puntuación: 0</p>
+            <h2 class="section-title glow">🔍 Explorador (Búsqueda)</h2>
+            <div class="card search-engine">
+                <input type="text" id="searchQuery" placeholder="Busca en Galaxy X..." class="input-full">
+                <button id="searchBtn" class="primary-btn">Buscar</button>
+                <div id="searchResultsExplorer" class="search-results"></div>
             </div>
         </section>
 
@@ -230,9 +218,9 @@
             <h2 class="section-title glow">👤 Perfil</h2>
             <div class="card profile-config-card">
                 <label for="username">Nombre:</label>
-                <input type="text" id="username" placeholder="Nombre de usuario" class="input-full">
-                <label for="userEmail">Correo electrónico:</label>
-                <input type="email" id="userEmail" placeholder="tu@correo.com" class="input-full">
+                <input type="text" id="username" class="input-full">
+                <label for="userEmail">Correo:</label>
+                <input type="email" id="userEmail" class="input-full">
                 <label for="userAvatarInput">Avatar:</label>
                 <input type="file" id="userAvatarInput" accept="image/*">
                 <div class="profile-actions">
@@ -250,7 +238,7 @@
             <h2 class="section-title glow">ℹ️ Info</h2>
             <div class="card info-card">
                 <p>Galaxy X: Hub galáctico con chat, foro, música y más.</p>
-                <iframe src="https://drive.google.com/file/d/1w_DdAjCHnycZyHeLRUqRy9G75sb7PZSb/preview" width="100%" height="315" allowfullscreen></iframe>
+                <iframe src="https://drive.google.com/file/d/1w_DdAjCHnycZyHeLRUqRy9G75sb7PZSb/preview" width="100%" height="315"></iframe>
             </div>
         </section>
 
