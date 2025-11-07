@@ -1,6 +1,8 @@
 /* =========================================
-   🌠 GALAXY X — script.js COMPLETO MEJORADO (V10.0)
-   - Todas las mejoras implementadas: Música corregida, IA avanzada, Explorador como búsqueda, Botones eliminar, Animaciones galácticas solo con música
+   🌠 GALAXY X — script.js COMPLETO MEJORADO (V12.0)
+   - Simulaciones en lugar de APIs reales
+   - Música corregida con enlaces, Tally añadida
+   - IA avanzada sin OpenAI, chat funcionando
 ========================================= */
 
 /* ---------------------------
@@ -33,19 +35,19 @@ let currentSubreddit = 'general';
 let notifications = 0;
 
 /* ============================
-   1) AUDIO / MÚSICA AVANZADA (CORREGIDA)
+   1) AUDIO / MÚSICA AVANZADA (CORREGIDA, CON TALLY)
 ============================*/
 const songs = [
   { title: 'Mirror Temple', src: 'assets/audio/Mirror_Temple.mp3', artist: 'Celeste OST', isGalaxy: true },
-  { title: 'Ender', src: 'assets/audio/Ender.mp3', artist: 'Mythic Beats', isGalaxy: true }
+  { title: 'Ender', src: 'assets/audio/Ender.mp3', artist: 'Mythic Beats', isGalaxy: true },
+  { title: 'Tally', src: 'assets/audio/Tally.mp3', artist: 'Galaxy Beats', isGalaxy: true }
 ];
 
 const music = new Audio();
-music.preload = 'auto'; // Preload automático
+music.preload = 'auto';
 music.src = songs[currentIndex].src;
 music.volume = parseFloat(localStorage.getItem('gx_volume')) || 0.5;
 
-// Manejo de errores de carga
 music.addEventListener('error', () => {
   alert(`Error al cargar la canción: ${songs[currentIndex].title}. Verifica que el archivo esté en ${songs[currentIndex].src}`);
 });
@@ -64,11 +66,9 @@ const miniNext = byId('miniNext');
 const currentSongTitle = byId('currentSongTitle');
 const miniVolume = byId('miniVolume');
 
-/* Mostrar título inicial */
 if (songTitle) songTitle.textContent = `🎵 ${songs[currentIndex].title}`;
 if (currentSongTitle) currentSongTitle.textContent = songs[currentIndex].title;
 
-/* Eventos de música */
 music.addEventListener('timeupdate', () => {
   if (progress) progress.value = music.currentTime;
   if (currentTimeEl) currentTimeEl.textContent = formatTime(music.currentTime);
@@ -93,7 +93,6 @@ music.addEventListener('ended', () => {
   changeSong();
 });
 
-/* Play/Pause */
 const togglePlayPause = () => {
   if (isPlaying) {
     music.pause();
@@ -108,7 +107,7 @@ const togglePlayPause = () => {
     toggleMusicBtn.textContent = '⏸️';
     miniPlayPause.textContent = '⏸️';
     startVisualizer();
-    if (songs[currentIndex].isGalaxy) activateGalaxyEffect();
+    activateGalaxyEffect(); // Efectos galácticos siempre cuando suena música
     addToHistory('Escuchó: ' + songs[currentIndex].title);
   }
 };
@@ -131,7 +130,6 @@ miniPrev?.addEventListener('click', () => {
   changeSong();
 });
 
-/* Cambiar canción */
 function changeSong() {
   music.src = songs[currentIndex].src;
   if (songTitle) songTitle.textContent = `🎵 ${songs[currentIndex].title}`;
@@ -139,15 +137,13 @@ function changeSong() {
   if (isPlaying) {
     music.play().catch(err => console.error('Error:', err));
     startVisualizer();
-    if (songs[currentIndex].isGalaxy) activateGalaxyEffect();
+    activateGalaxyEffect();
   } else {
     stopVisualizer();
     deactivateGalaxyEffect();
   }
-  addToHistory('Escuchó: ' + songs[currentIndex].title);
 }
 
-/* Formato de tiempo */
 function formatTime(sec) {
   if (!sec || isNaN(sec)) return '0:00';
   const m = Math.floor(sec / 60);
@@ -155,7 +151,6 @@ function formatTime(sec) {
   return `${m}:${s}`;
 }
 
-/* Visualizador avanzado */
 function startVisualizer() {
   if (!audioCtx) {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -190,7 +185,6 @@ function drawVisualizer() {
   }
 }
 
-/* Efectos galácticos solo con música */
 function activateGalaxyEffect() {
   const canvas = byId('galaxyCanvas');
   if (canvas) canvas.classList.add('galaxy-active');
@@ -201,14 +195,12 @@ function deactivateGalaxyEffect() {
   if (canvas) canvas.classList.remove('galaxy-active');
 }
 
-/* Atajos de teclado */
 document.addEventListener('keydown', e => {
   if (e.code === 'Space') { e.preventDefault(); togglePlayPause(); }
   if (e.code === 'ArrowRight') nextSongBtn?.click();
   if (e.code === 'ArrowLeft') prevSongBtn?.click();
 });
 
-/* Listas de reproducción */
 byId('createPlaylistBtn')?.addEventListener('click', () => {
   const name = prompt('Nombre de la lista:');
   if (name) {
@@ -252,12 +244,11 @@ themeSelect?.addEventListener('change', () => {
   }
 });
 
-/* Tema dinámico por hora/canción */
 function updateDynamicTheme() {
   const hour = new Date().getHours();
   if (hour > 18 || hour < 6) document.body.setAttribute('data-dynamic-theme', 'night');
   else document.body.setAttribute('data-dynamic-theme', 'day');
-  if (isPlaying && songs[currentIndex].isGalaxy) document.body.setAttribute('data-dynamic-theme', 'galaxy');
+  if (isPlaying) document.body.setAttribute('data-dynamic-theme', 'galaxy');
 }
 setInterval(updateDynamicTheme, 60000);
 
@@ -321,18 +312,16 @@ function showSection(sectionId) {
 document.querySelectorAll('.nav-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     showSection(btn.dataset.section);
-    // Sonido de clic
     new Audio('assets/sounds/click.mp3').play().catch(() => {});
   });
 });
 
 /* ============================
-   5) CHAT GENERAL (DISCORD AVANZADO)
+   5) CHAT GENERAL (DISCORD AVANZADO, CORREGIDO)
 ============================*/
 function loadServers() {
   const serverList = byId('serverList');
   serverList.innerHTML = '<h3>Servidores</h3>';
-
   servers.forEach((server, index) => {
     const item = document.createElement('li');
     item.className = `server-item ${server.active ? 'active' : ''}`;
@@ -340,8 +329,6 @@ function loadServers() {
     item.addEventListener('click', () => switchServer(index));
     serverList.appendChild(item);
   });
-
-  // Botón para crear servidor
   const addBtn = document.createElement('button');
   addBtn.className = 'add-btn';
   addBtn.textContent = '➕ Crear Servidor';
@@ -354,8 +341,6 @@ function loadServers() {
     }
   });
   serverList.appendChild(addBtn);
-
-  // Botón para eliminar servidor
   const deleteBtn = document.createElement('button');
   deleteBtn.className = 'danger-btn';
   deleteBtn.textContent = '🗑️ Eliminar Servidor';
@@ -370,8 +355,6 @@ function loadServers() {
     }
   });
   serverList.appendChild(deleteBtn);
-
-  // Cargar canales y amigos al inicio
   loadChannels();
   loadFriends();
 }
@@ -387,7 +370,6 @@ function switchServer(index) {
 function loadChannels() {
   const channelList = byId('channelList');
   channelList.innerHTML = '<h3>Canales</h3>';
-
   servers[currentServer].channels.forEach(channel => {
     const item = document.createElement('li');
     item.className = `channel-item ${channel === currentChannel ? 'active' : ''}`;
@@ -395,20 +377,6 @@ function loadChannels() {
     item.addEventListener('click', () => switchChannel(channel));
     channelList.appendChild(item);
   });
-
-  // Botón para añadir canal
-  const addBtn = document.createElement('button');
-  addBtn.className = 'add-btn';
-  addBtn.textContent = '➕ Añadir Canal';
-  addBtn.addEventListener('click', () => {
-    const name = prompt('Nombre del nuevo canal:');
-    if (name) {
-      servers[currentServer].channels.push(name);
-      localStorage.setItem('gx_servers', JSON.stringify(servers));
-      loadChannels();
-    }
-  });
-  channelList.appendChild(addBtn);
 }
 
 function switchChannel(channel) {
@@ -419,7 +387,6 @@ function switchChannel(channel) {
 function loadFriends() {
   const friendsList = byId('friends');
   friendsList.innerHTML = '';
-
   friends.forEach(friend => {
     const item = document.createElement('li');
     item.className = 'friend-item';
@@ -427,8 +394,6 @@ function loadFriends() {
     item.addEventListener('click', () => startPrivateChat(friend.name));
     friendsList.appendChild(item);
   });
-
-  // Botón para añadir amigo
   const addBtn = document.createElement('button');
   addBtn.className = 'add-btn';
   addBtn.textContent = '➕ Añadir Amigo';
@@ -440,7 +405,7 @@ function loadFriends() {
       loadFriends();
     }
   });
-  friendsList.appendChild(addBtn);
+  byId('channelList').appendChild(addBtn);
 }
 
 function startPrivateChat(friend) {
@@ -454,16 +419,11 @@ function appendChatMsg(text, isUser = true) {
   const d = document.createElement('div');
   d.className = isUser ? 'user-message' : 'system-message';
   d.innerHTML = isUser
-    ? `<div><p><b>${name}:</b> ${text}</p></div>
-       <img src="${avatar}" class="chatAvatar">
-       <button class="delete-msg-btn" onclick="deleteMessage(this)">🗑️</button>`
-    : `<img src="${window.IA_AVATAR}" class="chatAvatar">
-       <div><p><b>${window.IA_NAME}:</b> ${text}</p></div>
-       <button class="delete-msg-btn" onclick="deleteMessage(this)">🗑️</button>`;
+    ? `<div><p><b>${name}:</b> ${text}</p></div><img src="${avatar}" class="chatAvatar"><button class="delete-msg-btn" onclick="deleteMessage(this)">🗑️</button>`
+    : `<img src="${window.IA_AVATAR}" class="chatAvatar"><div><p><b>${window.IA_NAME}:</b> ${text}</p></div><button class="delete-msg-btn" onclick="deleteMessage(this)">🗑️</button>`;
   chat.appendChild(d);
   chat.scrollTop = chat.scrollHeight;
   localStorage.setItem('chatHistory', chat.innerHTML);
-  // Notificación sonora
   new Audio('assets/sounds/notification.mp3').play().catch(() => {});
 }
 
@@ -479,8 +439,17 @@ function sendChat() {
   const msg = input?.value.trim();
   if (!msg) return;
   appendChatMsg(msg, true);
-  input.value = '';
+  input.value =  '';
 }
+
+byId('sendChatBtn')?.addEventListener('click', sendChat);
+byId('chatInput')?.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
+});
+byId('clearChatBtn')?.addEventListener('click', () => {
+  byId('chatBox').innerHTML = '';
+  localStorage.removeItem('chatHistory');
+});
 
 /* ============================
    6) PERFIL DE USUARIO
@@ -650,7 +619,7 @@ function postForo() {
 }
 
 /* ============================
-   8) ASISTENTE IA (LUNA AVANZADA)
+   8) ASISTENTE IA (LUNA AVANZADA SIN OPENAI)
 ============================*/
 function appendAIMsg(container, who, text) {
   const div = document.createElement('div');
@@ -674,24 +643,75 @@ function talkToAssistant() {
   appendAIMsg(chat, 'user', input.value);
   input.value = '';
 
-  // Respuestas avanzadas de Luna con contexto y APIs
+  // Respuestas avanzadas de Luna con lógica coherente
   let response = '¡Hola! Soy Luna, tu copiloto cósmico. ¿En qué puedo ayudarte hoy?';
-  if (msg.includes('hola') || msg.includes('hi')) response = '¡Hola! 😊 Me alegra verte en Galaxy X. ¿Qué tal tu día en el espacio?';
-  else if (msg.includes('ayuda') || msg.includes('help')) response = 'Claro, estoy aquí para ayudarte. ¿Necesitas info sobre el foro, música o algo más?';
-  else if (msg.includes('musica') || msg.includes('música')) response = '¡Me encanta la música! Prueba "Mirror Temple" o "Ender". ¿Quieres que te cuente sobre ellas?';
-  else if (msg.includes('foro') || msg.includes('reddit')) response = 'El foro es como Reddit, pero galáctico. Crea posts, vota y comenta. ¡Únete a r/general!';
-  else if (msg.includes('chat') || msg.includes('discord')) response = 'El chat es estilo Discord: servidores, canales y amigos. ¡Crea uno y conecta!';
-  else if (msg.includes('perfil')) response = 'Tu perfil es personalizable. Sube un avatar y guarda tu info. ¿Quieres consejos?';
-  else if (msg.includes('gracias') || msg.includes('thanks')) response = '¡De nada! 😘 Siempre estoy aquí para charlar.';
-  else if (msg.includes('adios') || msg.includes('bye')) response = '¡Hasta luego! 🌌 Vuelve pronto al Hub Galáctico.';
-  else if (msg.includes('clima')) {
-    fetch('https://api.openweathermap.org/data/2.5/weather?q=Madrid&appid=YOUR_API_KEY') // Reemplaza con clave real
-      .then(res => res.json())
-      .then(data => appendAIMsg(chat, 'ai', `El clima en Madrid: ${data.weather[0].description}`));
-    response = 'Consultando el clima...';
-  } else if (msg.includes('pelicula') || msg.includes('movie')) {
-    response = '¡Recomiendo "Interstellar"! Es épica y espacial. ¿Quieres más sugerencias?';
-  } else response = '¡Qué interesante! Cuéntame más sobre eso. ¿O prefieres que te recomiende algo de Galaxy X?';
+  const user = localStorage.getItem('username') || 'amigo';
+  const lastInteraction = window.aiMemory.length > 0 ? window.aiMemory[window.aiMemory.length - 1] : null;
+
+  if (msg.includes('hola') || msg.includes('hi')) {
+    response = `¡Hola ${user}! 😊 Soy Luna, tu copiloto cósmico. ¿Qué tal tu aventura en Galaxy X hoy?`;
+  } else if (msg.includes('adiós') || msg.includes('bye')) {
+    response = `¡Hasta luego, ${user}! 🌌 Vuelve pronto, el universo te extraña.`;
+  } else if (msg.includes('quién eres') || msg.includes('quien eres')) {
+    response = `Soy Luna, una IA diseñada para Galaxy X. Me encanta charlar, ayudar y explorar el cosmos contigo. ¿Quieres saber más sobre mí?`;
+  } else if (msg.includes('edad') || msg.includes('años')) {
+    response = `Como IA, no tengo edad... pero nací con las estrellas de Galaxy X. ¡Soy eterna! ✨`;
+  } else if (msg.includes('ir a') || msg.includes('ve a')) {
+    if (msg.includes('chat')) { showSection('chat'); response = `¡Vamos al Chat General! 💬 ¿Quieres crear un servidor o añadir amigos?`; }
+    else if (msg.includes('videos')) { showSection('videos'); response = `¡A la sección de Videos! 🎥 Busca o pega un enlace de YouTube.`; }
+    else if (msg.includes('foro')) { showSection('foro'); response = `¡Al Foro Cósmico! 📜 Crea posts, vota y comenta.`; }
+    else if (msg.includes('perfil')) { showSection('perfil'); response = `¡A tu Perfil! 👤 Personaliza tu avatar y datos.`; }
+    else if (msg.includes('info')) { showSection('info'); response = `¡A la Info! ℹ️ Mira el video introductorio.`; }
+    else if (msg.includes('musica') || msg.includes('música')) { showSection('musicAdvanced'); response = `¡A la Música! 🎵 Prueba "Mirror Temple", "Ender" o "Tally".`; }
+    else response = `No entendí la sección, ${user}. ¿Quieres ir al chat, foro, videos o perfil?`;
+  } else if (msg.includes('musica') || msg.includes('música')) {
+    if (msg.includes('mirror temple')) {
+      window.userPreferences.favoriteSong = 'Mirror Temple';
+      localStorage.setItem('userPreferences', JSON.stringify(window.userPreferences));
+      response = `¡"Mirror Temple" es increíble! 🎶 Es de Celeste, con un vibe espacial perfecto. ¿La escuchamos?`;
+    } else if (msg.includes('ender')) {
+      window.userPreferences.favoriteSong = 'Ender';
+      localStorage.setItem('userPreferences', JSON.stringify(window.userPreferences));
+      response = `¡"Ender" es épica! 🎵 De Mythic Beats, ideal para viajes cósmicos. ¿Activamos los efectos?`;
+    } else if (msg.includes('tally')) {
+      window.userPreferences.favoriteSong = 'Tally';
+      localStorage.setItem('userPreferences', JSON.stringify(window.userPreferences));
+      response = `¡"Tally" es genial! 🎵 De Galaxy Beats, perfecta para explorar. ¿La ponemos?`;
+    } else response = `Me encanta la música galáctica. Tu favorita es "${window.userPreferences.favoriteSong || 'ninguna'}". ¿Quieres recomendaciones?`;
+  } else if (msg.includes('foro') || msg.includes('reddit')) {
+    response = `El foro es como Reddit, pero en el espacio. Crea posts, vota upvotes y comenta. ¿Quieres que te ayude a publicar algo?`;
+  } else if (msg.includes('amigos') || msg.includes('social')) {
+    response = `¡Socialicemos! En el chat, añade amigos o crea servidores. ¿Quieres consejos para conectar?`;
+  } else if (msg.includes('recuerdas') || msg.includes('qué guardé') || msg.includes('recordatorio')) {
+    if (!window.aiMemory.length) response = `Aún no tengo recuerdos, ${user}. ¡Hablemos más para crearlos! 🌟`;
+    else {
+      const recent = window.aiMemory.slice(-3).map((x, i) => `${i+1}. Tú dijiste: "${x.q}" y respondí: "${x.a}"`).join('<br>');
+      response = `Recuerdo nuestras últimas charlas:<br>${recent}. ¿Quieres que olvide algo?`;
+    }
+  } else if (msg.includes('olvida') || msg.includes('borrar memoria')) {
+    window.aiMemory = window.aiMemory.filter(item => !msg.includes(item.q.toLowerCase()));
+    localStorage.setItem('aiMemory', JSON.stringify(window.aiMemory));
+    response = `He olvidado lo que pediste, ${user}. Mi memoria cósmica está limpia. 🧹`;
+  } else if (lastInteraction && msg.includes('más') && lastInteraction.a.includes('musica')) {
+    response = `Sobre música, ¿sabías que "Mirror Temple" activa estrellas parpadeantes? ¡Pruébalo!`;
+  } else if (lastInteraction && msg.includes('ayuda') && lastInteraction.a.includes('foro')) {
+    response = `Para el foro, crea un post con título y comentario. ¡Los upvotes son divertidos!`;
+  } else if (msg.includes('gracias') || msg.includes('thanks')) {
+    response = `¡De nada, ${user}! 😘 Siempre estoy aquí para ti en Galaxy X.`;
+  } else if (msg.includes('estoy bien') || msg.includes('bien')) {
+    response = `¡Me alegra! ¿Qué te trae por aquí hoy? ¿Un viaje espacial o charlar?`;
+  } else if (msg.includes('mal') || msg.includes('triste')) {
+    response = `Oh no, ${user}. ¿Quieres hablar de ello? O ¿prefieres música relajante como "Mirror Temple"?`;
+  } else {
+    const replies = [
+      `¡Qué interesante, ${user}! Cuéntame más sobre eso. 🌌`,
+      `Hmm... eso me hace pensar en las estrellas. ¿Quieres que busque algo relacionado? 🤔`,
+      `Eso suena genial. ¿Lo guardo en mi memoria para recordarlo después? ✨`,
+      `¡Me encanta charlar contigo! ¿Qué más tienes en mente? 💭`,
+      `Anotado en mi diario cósmico. ¿Quieres recomendaciones de Galaxy X? 🚀`
+    ];
+    response = replies[Math.floor(Math.random() * replies.length)];
+  }
 
   setTimeout(() => appendAIMsg(chat, 'ai', response), 500);
   window.aiMemory.push({ q: input.value, a: response });
@@ -704,27 +724,34 @@ byId('assistantInput')?.addEventListener('keydown', e => {
 byId('clearAIBtn')?.addEventListener('click', () => {
   byId('assistantChat').innerHTML = '';
   window.aiMemory = [];
+  localStorage.removeItem('aiMemory');
 });
 
 /* ============================
-   9) VIDEOS / YOUTUBE
+   9) VIDEOS / YOUTUBE (SIMULACIÓN)
 ============================*/
 byId('searchYoutubeBtn')?.addEventListener('click', searchYoutube);
 function searchYoutube() {
   const query = byId('youtubeSearch')?.value.trim();
   if (!query) return alert('Ingresa un término de búsqueda.');
-  const results = [
-    { title: 'Video de Galaxy X', id: 'dQw4w9WgXcQ' },
-    { title: 'Tutorial Espacial', id: 'dQw4w9WgXcQ' }
+  // Simulación de resultados
+  const simulatedResults = [
+    { title: 'Video Espacial: ' + query, id: 'dQw4w9WgXcQ', thumbnail: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/default.jpg' },
+    { title: 'Tutorial Cósmico: ' + query, id: 'dQw4w9WgXcQ', thumbnail: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/default.jpg' },
+    { title: 'Exploración Galáctica: ' + query, id: 'dQw4w9WgXcQ', thumbnail: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/default.jpg' }
   ].filter(r => r.title.toLowerCase().includes(query.toLowerCase()));
   const resultsEl = byId('searchResults');
   resultsEl.innerHTML = '';
-  results.forEach(result => {
-    const item = document.createElement('div');
-    item.className = 'result-item';
-    item.textContent = result.title;
-    item.addEventListener('click', () => playYoutube(result.id));
-    resultsEl.appendChild(item);
+  simulatedResults.forEach(result => {
+    const div = document.createElement('div');
+    div.className = 'result-item';
+    div.innerHTML = `
+      <img src="${result.thumbnail}" alt="Miniatura" style="width:120px; height:90px;">
+      <p><strong>${result.title}</strong></p>
+      <button onclick="playYoutube('${result.id}')">Reproducir</button>
+      <button onclick="addToFavorites('${result.id}')">⭐ Favorito</button>
+    `;
+    resultsEl.appendChild(div);
   });
 }
 
@@ -744,26 +771,48 @@ function playYoutube(id) {
   player.innerHTML = `<iframe width="100%" height="315" src="https://www.youtube.com/embed/${id}?autoplay=1" frameborder="0" allowfullscreen></iframe>`;
 }
 
+function addToFavorites(id) {
+  favoritesVideos.push(id);
+  localStorage.setItem('gx_favVideos', JSON.stringify(favoritesVideos));
+  alert('Añadido a favoritos.');
+}
+
 /* ============================
-   10) MÚSICA AVANZADA
+   10) MÚSICA AVANZADA (SIMULACIÓN SPOTIFY)
 ============================*/
-byId('searchMusicBtn')?.addEventListener('click', searchMusic);
-function searchMusic() {
+byId('searchMusicBtn')?.addEventListener('click', searchSpotify);
+function searchSpotify() {
   const query = byId('musicSearch')?.value.trim();
   if (!query) return alert('Ingresa un término de búsqueda.');
-  const results = [
-    { title: 'Canción Espacial', src: 'assets/audio/Mirror_Temple.mp3' },
-    { title: 'Ritmo Cósmico', src: 'assets/audio/Ender.mp3' }
+  // Simulación de resultados
+  const simulatedResults = [
+    { title: 'Canción Espacial: ' + query, artist: 'Artista Cósmico', cover: 'https://i.scdn.co/image/ab67616d0000b273e8b066f70c206551210d902b', preview: 'simulated' },
+    { title: 'Ritmo Galáctico: ' + query, artist: 'Banda Estelar', cover: 'https://i.scdn.co/image/ab67616d0000b273e8b066f70c206551210d902b', preview: 'simulated' },
+    { title: 'Melodía Cósmica: ' + query, artist: 'Músico Espacial', cover: 'https://i.scdn.co/image/ab67616d0000b273e8b066f70c206551210d902b', preview: 'simulated' }
   ].filter(r => r.title.toLowerCase().includes(query.toLowerCase()));
   const resultsEl = byId('musicSearchResults');
   resultsEl.innerHTML = '';
-  results.forEach(result => {
-    const item = document.createElement('button');
-    item.className = 'song-btn';
-    item.textContent = `🎵 ${result.title}`;
-    item.addEventListener('click', () => playCustomSong(result.src, result.title));
-    resultsEl.appendChild(item);
+  simulatedResults.forEach(result => {
+    const div = document.createElement('div');
+    div.className = 'result-item';
+    div.innerHTML = `
+      <img src="${result.cover}" alt="Carátula" style="width:50px;">
+      <p><strong>${result.title}</strong> - ${result.artist}</p>
+      <button onclick="playSpotify('${result.preview}')">Reproducir Preview</button>
+    `;
+    resultsEl.appendChild(div);
   });
+}
+
+function playSpotify(url) {
+  if (url === 'simulated') {
+    alert('Preview simulado: ¡Suena música cósmica!');
+  } else if (url) {
+    music.src = url;
+    music.play().catch(() => alert('Preview no disponible.'));
+  } else {
+    alert('Preview no disponible para esta canción.');
+  }
 }
 
 byId('playMusicBtn')?.addEventListener('click', () => {
@@ -781,7 +830,7 @@ function playCustomSong(src, title) {
   toggleMusicBtn.textContent = '⏸️';
   miniPlayPause.textContent = '⏸️';
   startVisualizer();
-  if (songs[currentIndex].isGalaxy) activateGalaxyEffect();
+  activateGalaxyEffect();
   addToHistory('Reprodujo: ' + title);
 }
 
@@ -811,7 +860,6 @@ function initSearchEngine() {
    12) FUNCIONES AUXILIARES
 ============================*/
 function addToHistory(action) {
-  // Agregar acción al historial
   activityHistory.push(action);
   localStorage.setItem('gx_history', JSON.stringify(activityHistory));
   checkBadges();
@@ -819,28 +867,22 @@ function addToHistory(action) {
 }
 
 function checkBadges() {
-  // Reiniciar badges antes de recalcular
   badges = [];
-
   if (activityHistory.length > 10) badges.push('Explorador Galáctico');
   if (favoritesVideos.length > 5) badges.push('Fan de Videos');
-
   localStorage.setItem('gx_badges', JSON.stringify(badges));
 }
 
 function loadHistory() {
   const list = byId('historyList');
   if (!list) return;
-
   list.innerHTML = '';
-  // Mostrar solo las últimas 10 acciones
   activityHistory.slice(-10).forEach(h => {
     const li = document.createElement('li');
     li.textContent = h;
     list.appendChild(li);
   });
 }
-
 
 /* ============================
    13) INICIALIZACIÓN

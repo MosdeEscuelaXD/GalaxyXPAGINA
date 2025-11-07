@@ -1,9 +1,8 @@
 /* =========================================
-   🌠 GALAXY X | STYLES COMPLETO MEJORADO (V10.0)
-   - Layout horizontal: sidebar fijo, contenido a la derecha
-   - Tema Nieve y Oscuro Estelar añadidos
-   - Animaciones galácticas solo con música
-   - Foto perfil pequeña/circular, botones eliminar, responsive total
+   🌠 GALAXY X | STYLES COMPLETO MEJORADO (V11.0)
+   - Mejoras menores: animaciones sutiles, íconos, tooltips
+   - Interfaces de Música y Videos mejoradas (grid-view, previews)
+   - Todo lo demás intacto
 ========================================= */
 
 /* -----------------------------------------
@@ -322,7 +321,7 @@ body {
 .ai-controls { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
 
 /* -----------------------------------------
-   7. VIDEOS
+   7. VIDEOS (MEJORADO: GRID-VIEW, PREVIEWS)
 ----------------------------------------- */
 .video-search-bar, .video-input-bar {
   margin-bottom: 20px;
@@ -339,23 +338,55 @@ body {
   margin-top: 20px;
   max-height: 300px;
   overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
 }
 
 .search-results .result-item {
   padding: 10px;
-  margin-bottom: 10px;
   background: rgba(var(--color-primary-rgb), 0.1);
   border-radius: 10px;
   cursor: pointer;
   transition: background 0.3s, transform 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 .search-results .result-item:hover {
   background: rgba(var(--color-primary-rgb), 0.3);
-  transform: scale(1.02);
+  transform: scale(1.05);
 }
 
-.search-results .result-item:hover { background: rgba(var(--color-primary-rgb),0.3); }
+.search-results .result-item img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.search-results .result-item p {
+  margin: 0;
+  font-size: 0.9em;
+}
+
+.search-results .result-item button {
+  margin-top: 10px;
+  background: var(--color-secondary);
+  border: none;
+  color: var(--color-sidebar-bg);
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.search-results .result-item button:hover {
+  background: var(--color-primary);
+}
 
 /* -----------------------------------------
    8. FORO (ESTILO REDDIT)
@@ -379,7 +410,7 @@ body {
 .comments { margin-top: 15px; padding-left: 20px; border-left: 2px solid var(--color-muted); }
 
 /* -----------------------------------------
-   9. MÚSICA
+   9. MÚSICA (MEJORADO: GRID-VIEW, PREVIEWS)
 ----------------------------------------- */
 .music-search-bar, .music-input-bar { margin-bottom: 20px; }
 .new-music-player { padding: 30px; }

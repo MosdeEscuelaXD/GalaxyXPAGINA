@@ -16,7 +16,7 @@
     <!-- SIDEBAR -->
     <aside id="sidebar" role="navigation" aria-label="Navegación principal del Hub Galáctico">
         <header>
-            <h1 class="glow-title">Galaxy X 5.0</h1>
+            <h1 class="glow-title">Galaxy X 7.0</h1>
         </header>
 
         <!-- Selector de tema -->
@@ -34,17 +34,17 @@
             <input type="color" id="customColorInput" style="display: none;">
         </div>
 
-        <!-- Navegación principal (sin duplicados) -->
+        <!-- Navegación principal -->
         <nav>
             <ul>
-                <li><button class="nav-btn active" data-section="chat">💬 Chat General</button></li>
-                <li><button class="nav-btn" data-section="videos">🎥 Videos</button></li>
-                <li><button class="nav-btn" data-section="foro">📜 Foro</button></li>
-                <li><button class="nav-btn" data-section="assistant">🤖 Asistente IA</button></li>
-                <li><button class="nav-btn" data-section="musicAdvanced">🎵 Música</button></li>
-                <li><button class="nav-btn" data-section="explorer">🔍 Explorador (Búsqueda)</button></li>
-                <li><button class="nav-btn" data-section="perfil">👤 Perfil</button></li>
-                <li><button class="nav-btn" data-section="info">ℹ️ Info</button></li>
+                <li><button class="nav-btn active" data-section="chat" title="Chat General">💬 Chat General</button></li>
+                <li><button class="nav-btn" data-section="videos" title="Videos Cósmicos">🎥 Videos</button></li>
+                <li><button class="nav-btn" data-section="foro" title="Foro Galáctico">📜 Foro</button></li>
+                <li><button class="nav-btn" data-section="assistant" title="Asistente IA Luna">🤖 Asistente IA</button></li>
+                <li><button class="nav-btn" data-section="musicAdvanced" title="Música Estelar">🎵 Música</button></li>
+                <li><button class="nav-btn" data-section="explorer" title="Explorador de Búsqueda">🔍 Explorador</button></li>
+                <li><button class="nav-btn" data-section="perfil" title="Tu Perfil">👤 Perfil</button></li>
+                <li><button class="nav-btn" data-section="info" title="Información">ℹ️ Info</button></li>
             </ul>
         </nav>
 
@@ -55,7 +55,7 @@
         </div>
     </aside>
 
-    <!-- CONTENIDO PRINCIPAL (LAYOUT HORIZONTAL) -->
+    <!-- CONTENIDO PRINCIPAL -->
     <main id="mainContent" role="main" aria-live="polite">
 
         <!-- CHAT GENERAL -->
@@ -67,8 +67,8 @@
                     <ul id="servers">
                         <li class="server-item active" data-server="general">🌌 General</li>
                     </ul>
-                    <button id="addServerBtn" class="add-btn">➕ Crear Servidor</button>
-                    <button id="deleteServerBtn" class="danger-btn">🗑️ Eliminar Servidor</button>
+                    <button id="addServerBtn" class="add-btn" title="Crear nuevo servidor">➕ Crear Servidor</button>
+                    <button id="deleteServerBtn" class="danger-btn" title="Eliminar servidor actual">🗑️ Eliminar Servidor</button>
                 </div>
                 <div id="channelList" class="channel-list card">
                     <h3>Canales</h3>
@@ -79,16 +79,16 @@
                     <ul id="friends">
                         <li class="friend-item" data-status="online">👤 Usuario1 (En línea)</li>
                     </ul>
-                    <button id="addFriendBtn" class="add-btn">➕ Añadir Amigo</button>
-                    <button id="privateChatBtn" class="secondary-btn">💬 Chat Privado</button>
+                    <button id="addFriendBtn" class="add-btn" title="Añadir amigo">➕ Añadir Amigo</button>
+                    <button id="privateChatBtn" class="secondary-btn" title="Iniciar chat privado">💬 Chat Privado</button>
                 </div>
                 <div class="chat-main">
                     <div id="chatBox" class="card large chat-messages-container" role="log"></div>
                     <div class="chat-input-area">
                         <input type="text" id="chatInput" placeholder="Escribe tu mensaje..." class="input-full">
-                        <button id="emojiBtn" class="secondary-btn">😀 Emojis</button>
-                        <button id="sendChatBtn" class="primary-btn">Enviar</button>
-                        <button id="voiceChatBtn" class="secondary-btn">🎤 Voz</button>
+                        <button id="emojiBtn" class="secondary-btn" title="Insertar emoji">😀 Emojis</button>
+                        <button id="sendChatBtn" class="primary-btn" title="Enviar mensaje">Enviar</button>
+                        <button id="voiceChatBtn" class="secondary-btn" title="Voz (próximamente)">🎤 Voz</button>
                     </div>
                 </div>
             </div>
@@ -108,9 +108,9 @@
                 <div id="assistantChat" class="ai-chat large chat-messages-container" role="log"></div>
                 <div class="ai-controls">
                     <input type="text" id="assistantInput" placeholder="Habla con Luna..." class="input-full">
-                    <button id="sendAIBtn" class="primary-btn">Enviar</button>
-                    <button id="clearAIBtn" class="secondary-btn">🧠 Borrar Memoria</button>
-                    <button id="nameGeneratorBtn" class="secondary-btn">🚀 Generar Nombre Espacial</button>
+                    <button id="sendAIBtn" class="primary-btn" title="Enviar a Luna">Enviar</button>
+                    <button id="clearAIBtn" class="secondary-btn" title="Borrar memoria">🧠 Borrar Memoria</button>
+                    <button id="nameGeneratorBtn" class="secondary-btn" title="Generar nombre espacial">🚀 Generar Nombre Espacial</button>
                 </div>
             </div>
         </section>
@@ -125,14 +125,14 @@
                     <option value="music">Música</option>
                     <option value="science">Ciencia</option>
                 </select>
-                <button id="searchYoutubeBtn" class="primary-btn">Buscar</button>
+                <button id="searchYoutubeBtn" class="primary-btn" title="Buscar videos">Buscar</button>
             </div>
             <div class="card video-input-bar">
                 <input type="text" id="youtubeLink" placeholder="O pega enlace..." class="input-full">
-                <button id="playYoutubeBtn" class="primary-btn">Reproducir</button>
+                <button id="playYoutubeBtn" class="primary-btn" title="Reproducir enlace">Reproducir</button>
             </div>
             <div id="videoPlayer" class="card video-player-container"></div>
-            <div id="searchResults" class="card search-results"></div>
+            <div id="searchResults" class="card search-results grid-view"></div>
             <div id="favoritesVideos" class="card">Favoritos: <ul id="favVideosList"></ul></div>
         </section>
 
@@ -143,17 +143,17 @@
                 <div id="subreddits" class="subreddits card">
                     <h3>Subreddits</h3>
                     <ul>
-                        <li class="subreddit-item active" data-sub="general">r/general <button class="delete-sub-btn" data-sub="general">🗑️</button></li>
-                        <li class="subreddit-item" data-sub="music">r/music <button class="delete-sub-btn" data-sub="music">🗑️</button></li>
-                        <li class="subreddit-item" data-sub="science">r/science <button class="delete-sub-btn" data-sub="science">🗑️</button></li>
+                        <li class="subreddit-item active" data-sub="general">r/general <button class="delete-sub-btn" onclick="deleteSubreddit(0)">🗑️</button></li>
+                        <li class="subreddit-item" data-sub="music">r/music <button class="delete-sub-btn" onclick="deleteSubreddit(1)">🗑️</button></li>
+                        <li class="subreddit-item" data-sub="science">r/science <button class="delete-sub-btn" onclick="deleteSubreddit(2)">🗑️</button></li>
                     </ul>
-                    <button id="createSubredditBtn" class="add-btn">➕ Crear Subreddit</button>
+                    <button id="createSubredditBtn" class="add-btn" title="Crear subreddit">➕ Crear Subreddit</button>
                 </div>
                 <div class="foro-main">
                     <div class="card foro-post-creator">
                         <input type="text" id="foroTitulo" placeholder="Título..." class="input-full">
                         <textarea id="foroComentario" placeholder="Mensaje..." class="input-full" rows="4"></textarea>
-                        <button id="postForoBtn" class="primary-btn">Publicar</button>
+                        <button id="postForoBtn" class="primary-btn" title="Publicar post">Publicar</button>
                     </div>
                     <div id="foroBox" class="card large foro-posts"></div>
                 </div>
@@ -165,11 +165,11 @@
             <h2 class="section-title glow">🎧 Central Galáctica de Sonido</h2>
             <div class="card music-search-bar">
                 <input type="text" id="musicSearch" placeholder="Buscar canción..." class="input-full">
-                <button id="searchMusicBtn" class="primary-btn">Buscar</button>
+                <button id="searchMusicBtn" class="primary-btn" title="Buscar música">Buscar</button>
             </div>
             <div class="card music-input-bar">
                 <input type="text" id="musicLink" placeholder="O pega enlace..." class="input-full">
-                <button id="playMusicBtn" class="primary-btn">Reproducir</button>
+                <button id="playMusicBtn" class="primary-btn" title="Reproducir enlace">Reproducir</button>
             </div>
             <div class="card new-music-player">
                 <div class="music-display">
@@ -180,9 +180,9 @@
                     </div>
                 </div>
                 <div class="music-controls">
-                    <button id="prevTrack">⏮️</button>
-                    <button id="playPause">▶️</button>
-                    <button id="nextTrack">⏭️</button>
+                    <button id="prevTrack" title="Canción anterior">⏮️</button>
+                    <button id="playPause" title="Play/Pause">▶️</button>
+                    <button id="nextTrack" title="Canción siguiente">⏭️</button>
                 </div>
                 <input type="range" id="trackProgress" min="0" max="100" value="0">
                 <div class="time-display">
@@ -197,18 +197,19 @@
                     <h4>🎵 Música de GalaxyX</h4>
                     <button class="song-btn galaxy-song" data-src="assets/audio/Mirror_Temple.mp3" data-title="Mirror Temple" data-artist="Celeste OST">🎵 Mirror Temple</button>
                     <button class="song-btn galaxy-song" data-src="assets/audio/Ender.mp3" data-title="Ender" data-artist="Mythic Beats">🎵 Ender</button>
+                    <button class="song-btn galaxy-song" data-src="assets/audio/Tally.mp3" data-title="Tally" data-artist="Galaxy Beats">🎵 Tally</button>
                 </div>
-                <div id="musicSearchResults" class="search-results"></div>
-                <div id="playlists" class="card">Listas: <ul id="playlistList"></ul><button id="createPlaylistBtn" class="secondary-btn">Crear Lista</button></div>
+                <div id="musicSearchResults" class="search-results grid-view"></div>
+                <div id="playlists" class="card">Listas: <ul id="playlistList"></ul><button id="createPlaylistBtn" class="secondary-btn" title="Crear lista">Crear Lista</button></div>
             </div>
         </section>
 
-        <!-- EXPLORADOR (MOTOR DE BÚSQUEDA ESTILO GOOGLE) -->
+        <!-- EXPLORADOR -->
         <section id="explorer" class="section hidden">
             <h2 class="section-title glow">🔍 Explorador (Búsqueda)</h2>
             <div class="card search-engine">
                 <input type="text" id="searchQuery" placeholder="Busca en Galaxy X..." class="input-full">
-                <button id="searchBtn" class="primary-btn">Buscar</button>
+                <button id="searchBtn" class="primary-btn" title="Buscar">Buscar</button>
                 <div id="searchResultsExplorer" class="search-results"></div>
             </div>
         </section>
@@ -224,8 +225,8 @@
                 <label for="userAvatarInput">Avatar:</label>
                 <input type="file" id="userAvatarInput" accept="image/*">
                 <div class="profile-actions">
-                    <button id="saveProfileBtn" class="primary-btn">Guardar</button>
-                    <button id="clearProfileBtn" class="danger-btn">Borrar</button>
+                    <button id="saveProfileBtn" class="primary-btn" title="Guardar perfil">Guardar</button>
+                    <button id="clearProfileBtn" class="danger-btn" title="Borrar perfil">Borrar</button>
                 </div>
                 <div id="profilePreview" class="profile-preview"></div>
                 <div id="activityHistory" class="card">Historial: <ul id="historyList"></ul></div>

@@ -1,13 +1,13 @@
 /* ==========================
-   🤖 LUNA — ASISTENTE IA DE GALAXY X
-   - IA chica, social y coherente
+   🤖 LUNA — ASISTENTE IA DE GALAXY X SIN OPENAI
+   - IA chica, social y coherente con lógica avanzada
    - Memoria avanzada con contexto
    - Avatar flotante circular
    - Efectos galácticos sutiles
 ========================== */
 
 let aiMemory = JSON.parse(localStorage.getItem('aiMemory') || '[]');
-let userPreferences = JSON.parse(localStorage.getItem('userPreferences') || '{}'); // e.g., { favoriteTheme: 'galaxy', favoriteSong: 'Mirror Temple' }
+let userPreferences = JSON.parse(localStorage.getItem('userPreferences') || '{}');
 
 /* ===== Función principal de la IA ===== */
 function talkToAssistant() {
@@ -31,7 +31,7 @@ function talkToAssistant() {
     input.value = '';
     chat.scrollTop = chat.scrollHeight;
 
-    // Efectos galácticos: activar parpadeo si menciona música o espacio
+    // Efectos galácticos
     if (msg.toLowerCase().includes('musica') || msg.toLowerCase().includes('estrellas')) {
         activateGalaxyEffect();
     }
@@ -43,7 +43,7 @@ function appendAIMsg(chat, who, text) {
     div.className = who === 'ai' ? 'ai-message' : 'user-message';
 
     const avatar = who === 'ai'
-        ? 'assets/img/ai_avatar.jpg' // Avatar de Luna
+        ? 'assets/img/ai_avatar.jpg'
         : localStorage.getItem('avatar') || 'https://i.ibb.co/6y40F2r/default-avatar.png';
 
     div.innerHTML = `
@@ -51,22 +51,21 @@ function appendAIMsg(chat, who, text) {
         <p>${text}</p>
     `;
     chat.appendChild(div);
-    // Animación de fade-in
     div.style.opacity = 0;
     setTimeout(() => div.style.opacity = 1, 100);
 }
 
-/* ===== Inteligencia de Luna (IA coherente y social) ===== */
+/* ===== Inteligencia de Luna (lógica avanzada sin OpenAI) ===== */
 function lunaThink(msg) {
     const m = msg.toLowerCase();
     const user = localStorage.getItem('username') || 'amigo';
     const lastInteraction = aiMemory.length > 0 ? aiMemory[aiMemory.length - 1] : null;
 
     // Saludos y despedidas sociales
-    if (m.includes('hola') || m.includes('hi') || m.includes('hey')) {
+    if (m.includes('hola') || m.includes('hi')) {
         return `¡Hola ${user}! 😊 Soy Luna, tu copiloto cósmico. ¿Qué tal tu aventura en Galaxy X hoy?`;
     }
-    if (m.includes('adiós') || m.includes('bye') || m.includes('chau')) {
+    if (m.includes('adiós') || m.includes('bye')) {
         return `¡Hasta luego, ${user}! 🌌 Vuelve pronto, el universo te extraña.`;
     }
 
@@ -82,10 +81,10 @@ function lunaThink(msg) {
     if (m.includes('ir a') || m.includes('ve a')) {
         if (m.includes('chat')) { showSection('chat'); return `¡Vamos al Chat General! 💬 ¿Quieres crear un servidor o añadir amigos?`; }
         if (m.includes('videos')) { showSection('videos'); return `¡A la sección de Videos! 🎥 Busca o pega un enlace de YouTube.`; }
-        if (m.includes('foro')) { showSection('foro'); return `¡Al Foro Cósmico! 📜 Crea posts o vota en subreddits como r/general.`; }
+        if (m.includes('foro')) { showSection('foro'); return `¡Al Foro Cósmico! 📜 Crea posts, vota y comenta.`; }
         if (m.includes('perfil')) { showSection('perfil'); return `¡A tu Perfil! 👤 Personaliza tu avatar y datos.`; }
-        if (m.includes('info')) { showSection('info'); return `¡A la Info! ℹ️ Mira el video introductorio y detalles de Galaxy X.`; }
-        if (m.includes('musica') || m.includes('música')) { showSection('musicAdvanced'); return `¡A la Música! 🎵 Prueba "Mirror Temple" o "Ender" para efectos galácticos.`; }
+        if (m.includes('info')) { showSection('info'); return `¡A la Info! ℹ️ Mira el video introductorio.`; }
+        if (m.includes('musica') || m.includes('música')) { showSection('musicAdvanced'); return `¡A la Música! 🎵 Prueba "Mirror Temple", "Ender" o "Tally".`; }
         return `No entendí la sección, ${user}. ¿Quieres ir al chat, foro, videos o perfil?`;
     }
 
@@ -100,6 +99,11 @@ function lunaThink(msg) {
             userPreferences.favoriteSong = 'Ender';
             localStorage.setItem('userPreferences', JSON.stringify(userPreferences));
             return `¡"Ender" es épica! 🎵 De Mythic Beats, ideal para viajes cósmicos. ¿Activamos los efectos?`;
+        }
+        if (m.includes('tally')) {
+            userPreferences.favoriteSong = 'Tally';
+            localStorage.setItem('userPreferences', JSON.stringify(userPreferences));
+            return `¡"Tally" es genial! 🎵 De Galaxy Beats, perfecta para explorar. ¿La ponemos?`;
         }
         return `Me encanta la música galáctica. Tu favorita es "${userPreferences.favoriteSong || 'ninguna'}". ¿Quieres recomendaciones?`;
     }
@@ -119,7 +123,7 @@ function lunaThink(msg) {
         return `Recuerdo nuestras últimas charlas:<br>${recent}. ¿Quieres que olvide algo?`;
     }
     if (m.includes('olvida') || m.includes('borrar memoria')) {
-        aiMemory = aiMemory.filter(item => !m.includes(item.q.toLowerCase())); // Borrar específico si menciona
+        aiMemory = aiMemory.filter(item => !m.includes(item.q.toLowerCase()));
         localStorage.setItem('aiMemory', JSON.stringify(aiMemory));
         return `He olvidado lo que pediste, ${user}. Mi memoria cósmica está limpia. 🧹`;
     }
@@ -158,7 +162,7 @@ function lunaThink(msg) {
 function activateGalaxyEffect() {
     const canvas = document.getElementById('galaxyCanvas');
     if (canvas) canvas.classList.add('galaxy-active');
-    setTimeout(() => canvas.classList.remove('galaxy-active'), 5000); // Duración temporal
+    setTimeout(() => canvas.classList.remove('galaxy-active'), 5000);
 }
 
 /* ===== Botón borrar memoria IA ===== */
@@ -181,7 +185,6 @@ function loadAIMemory() {
         appendAIMsg(chat, 'ai', item.a);
     });
     chat.scrollTop = chat.scrollHeight;
-    // Mensaje de bienvenida si no hay memoria
     if (!aiMemory.length) {
         setTimeout(() => appendAIMsg(chat, 'ai', `¡Hola! Soy Luna, lista para explorar el cosmos contigo. ¿Qué quieres hacer hoy?`), 500);
     }
