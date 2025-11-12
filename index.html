@@ -16,7 +16,7 @@
     <!-- SIDEBAR -->
     <aside id="sidebar" role="navigation" aria-label="Navegación principal del Hub Galáctico">
         <header>
-            <h1 class="glow-title">Galaxy X 7.0</h1>
+            <h1 class="glow-title">Galaxy X 8.0</h1>
         </header>
 
         <!-- Selector de tema -->
@@ -37,14 +37,14 @@
         <!-- Navegación principal -->
         <nav>
             <ul>
-                <li><button class="nav-btn active" data-section="chat" title="Chat General">💬 Chat General</button></li>
-                <li><button class="nav-btn" data-section="videos" title="Videos Cósmicos">🎥 Videos</button></li>
-                <li><button class="nav-btn" data-section="foro" title="Foro Galáctico">📜 Foro</button></li>
-                <li><button class="nav-btn" data-section="assistant" title="Asistente IA Luna">🤖 Asistente IA</button></li>
-                <li><button class="nav-btn" data-section="musicAdvanced" title="Música Estelar">🎵 Música</button></li>
+                <li><button class="nav-btn active" data-section="chat" title="Chat General con interfaz Discord">💬 Chat General</button></li>
+                <li><button class="nav-btn" data-section="videos" title="Videos Cósmicos con búsquedas simuladas">🎥 Videos</button></li>
+                <li><button class="nav-btn" data-section="foro" title="Foro Galáctico estilo Reddit">📜 Foro</button></li>
+                <li><button class="nav-btn" data-section="assistant" title="Asistente IA Luna con memoria">🤖 Asistente IA</button></li>
+                <li><button class="nav-btn" data-section="musicAdvanced" title="Música Estelar con efectos galácticos">🎵 Música</button></li>
                 <li><button class="nav-btn" data-section="explorer" title="Explorador de Búsqueda">🔍 Explorador</button></li>
-                <li><button class="nav-btn" data-section="perfil" title="Tu Perfil">👤 Perfil</button></li>
-                <li><button class="nav-btn" data-section="info" title="Información">ℹ️ Info</button></li>
+                <li><button class="nav-btn" data-section="perfil" title="Tu Perfil Personalizable">👤 Perfil</button></li>
+                <li><button class="nav-btn" data-section="info" title="Información y Video">ℹ️ Info</button></li>
             </ul>
         </nav>
 
@@ -58,9 +58,9 @@
     <!-- CONTENIDO PRINCIPAL -->
     <main id="mainContent" role="main" aria-live="polite">
 
-        <!-- CHAT GENERAL -->
+        <!-- CHAT GENERAL (INTERFAZ DISCORD MEJORADA) -->
         <section id="chat" class="section">
-            <h2 class="section-title glow">💬 Chat General</h2>
+            <h2 class="section-title glow">💬 Chat General (Estilo Discord)</h2>
             <div class="chat-layout">
                 <div id="serverList" class="server-list card">
                     <h3>Servidores</h3>
@@ -75,7 +75,9 @@
                     <ul id="channels">
                         <li class="channel-item active" data-channel="general">#general</li>
                     </ul>
+                    <button id="addChannelBtn" class="add-btn" title="Añadir canal">➕ Añadir Canal</button>
                     <h3>Amigos</h3>
+                    <input type="text" id="friendSearch" placeholder="Buscar amigo..." class="input-full" title="Buscar amigos">
                     <ul id="friends">
                         <li class="friend-item" data-status="online">👤 Usuario1 (En línea)</li>
                     </ul>
@@ -173,7 +175,7 @@
             </div>
             <div class="card new-music-player">
                 <div class="music-display">
-                    <img id="albumArt" src="assets/img/galaxy_music.jpg" alt="Carátula" class="album-art">
+                    <img id="albumArt" src="https://img.freepik.com/vector-premium/signos-musicales-iconos-vectoriales-neon-set-clave-musical-abajo-beat-sforzando-forte-signos-piano-vector-illust_87934-385.jpg" alt="Carátula" class="album-art">
                     <div class="song-info">
                         <h3 id="songTitle">Ninguna canción</h3>
                         <p id="songArtist">Selecciona...</p>

@@ -1,8 +1,8 @@
 /* =========================================
-   🌠 GALAXY X — script.js COMPLETO MEJORADO (V12.0)
-   - Simulaciones en lugar de APIs reales
-   - Música corregida con enlaces, Tally añadida
-   - IA avanzada sin OpenAI, chat funcionando
+   🌠 GALAXY X — script.js COMPLETO MEJORADO (V13.0)
+   - Buscar amigos en chat, interfaz Discord mejorada
+   - Efectos estrellas solo con canciones de página
+   - Más mejoras profesionales
 ========================================= */
 
 /* ---------------------------
@@ -35,7 +35,7 @@ let currentSubreddit = 'general';
 let notifications = 0;
 
 /* ============================
-   1) AUDIO / MÚSICA AVANZADA (CORREGIDA, CON TALLY)
+   1) AUDIO / MÚSICA AVANZADA (CORREGIDA, CON TALLY, EFECTOS ESTRELLAS SOLO GALAXYX)
 ============================*/
 const songs = [
   { title: 'Mirror Temple', src: 'assets/audio/Mirror_Temple.mp3', artist: 'Celeste OST', isGalaxy: true },
@@ -107,7 +107,7 @@ const togglePlayPause = () => {
     toggleMusicBtn.textContent = '⏸️';
     miniPlayPause.textContent = '⏸️';
     startVisualizer();
-    activateGalaxyEffect(); // Efectos galácticos siempre cuando suena música
+    if (songs[currentIndex].isGalaxy) activateGalaxyEffect(); // Efectos estrellas solo con canciones de página
     addToHistory('Escuchó: ' + songs[currentIndex].title);
   }
 };
@@ -137,7 +137,7 @@ function changeSong() {
   if (isPlaying) {
     music.play().catch(err => console.error('Error:', err));
     startVisualizer();
-    activateGalaxyEffect();
+    if (songs[currentIndex].isGalaxy) activateGalaxyEffect();
   } else {
     stopVisualizer();
     deactivateGalaxyEffect();
@@ -248,7 +248,7 @@ function updateDynamicTheme() {
   const hour = new Date().getHours();
   if (hour > 18 || hour < 6) document.body.setAttribute('data-dynamic-theme', 'night');
   else document.body.setAttribute('data-dynamic-theme', 'day');
-  if (isPlaying) document.body.setAttribute('data-dynamic-theme', 'galaxy');
+  if (isPlaying && songs[currentIndex].isGalaxy) document.body.setAttribute('data-dynamic-theme', 'galaxy');
 }
 setInterval(updateDynamicTheme, 60000);
 
@@ -317,7 +317,7 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
 });
 
 /* ============================
-   5) CHAT GENERAL (DISCORD AVANZADO, CORREGIDO)
+   5) CHAT GENERAL (DISCORD AVANZADO, BUSCAR AMIGOS, MEJORADO)
 ============================*/
 function loadServers() {
   const serverList = byId('serverList');
@@ -377,6 +377,18 @@ function loadChannels() {
     item.addEventListener('click', () => switchChannel(channel));
     channelList.appendChild(item);
   });
+  const addChannelBtn = document.createElement('button');
+  addChannelBtn.className = 'add-btn';
+  addChannelBtn.textContent = '➕ Añadir Canal';
+  addChannelBtn.addEventListener('click', () => {
+    const name = prompt('Nombre del canal:');
+    if (name) {
+      servers[currentServer].channels.push(name);
+      localStorage.setItem('gx_servers', JSON.stringify(servers));
+      loadChannels();
+    }
+  });
+  channelList.appendChild(addChannelBtn);
 }
 
 function switchChannel(channel) {
@@ -386,8 +398,11 @@ function switchChannel(channel) {
 
 function loadFriends() {
   const friendsList = byId('friends');
+  const searchInput = byId('friendSearch');
   friendsList.innerHTML = '';
-  friends.forEach(friend => {
+  const query = searchInput?.value.toLowerCase() || '';
+  const filteredFriends = friends.filter(f => f.name.toLowerCase().includes(query));
+  filteredFriends.forEach(friend => {
     const item = document.createElement('li');
     item.className = 'friend-item';
     item.textContent = `${friend.name} (${friend.status})`;
@@ -406,6 +421,14 @@ function loadFriends() {
     }
   });
   byId('channelList').appendChild(addBtn);
+  const privateBtn = document.createElement('button');
+  privateBtn.className = 'secondary-btn';
+  privateBtn.textContent = '💬 Chat Privado';
+  privateBtn.addEventListener('click', () => {
+    const friend = prompt('Nombre del amigo para chat privado:');
+    if (friend) startPrivateChat(friend);
+  });
+  byId('channelList').appendChild(privateBtn);
 }
 
 function startPrivateChat(friend) {
@@ -439,7 +462,7 @@ function sendChat() {
   const msg = input?.value.trim();
   if (!msg) return;
   appendChatMsg(msg, true);
-  input.value =  '';
+  input.value = '';
 }
 
 byId('sendChatBtn')?.addEventListener('click', sendChat);
@@ -450,6 +473,9 @@ byId('clearChatBtn')?.addEventListener('click', () => {
   byId('chatBox').innerHTML = '';
   localStorage.removeItem('chatHistory');
 });
+
+// Buscar amigos en tiempo real
+byId('friendSearch')?.addEventListener('input', loadFriends);
 
 /* ============================
    6) PERFIL DE USUARIO
@@ -727,6 +753,14 @@ byId('clearAIBtn')?.addEventListener('click', () => {
   localStorage.removeItem('aiMemory');
 });
 
+// Generador de nombres espaciales
+byId('nameGeneratorBtn')?.addEventListener('click', () => {
+  const prefixes = ['Nebula', 'Stellar', 'Cosmic', 'Astro', 'Galactic'];
+  const suffixes = ['Explorer', 'Voyager', 'Pilot', 'Guardian', 'Seeker'];
+  const name = prefixes[Math.floor(Math.random() * prefixes.length)] + ' ' + suffixes[Math.floor(Math.random() * suffixes.length)];
+  alert(`Tu nombre espacial generado: ${name} 🚀`);
+});
+
 /* ============================
    9) VIDEOS / YOUTUBE (SIMULACIÓN)
 ============================*/
@@ -830,7 +864,7 @@ function playCustomSong(src, title) {
   toggleMusicBtn.textContent = '⏸️';
   miniPlayPause.textContent = '⏸️';
   startVisualizer();
-  activateGalaxyEffect();
+  if (songs[currentIndex].isGalaxy) activateGalaxyEffect();
   addToHistory('Reprodujo: ' + title);
 }
 
